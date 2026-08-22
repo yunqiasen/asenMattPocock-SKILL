@@ -1,11 +1,20 @@
 ---
 name: codebase-design
-description: Shared vocabulary for designing deep modules. Use when the user wants to design or improve a module's interface, find deepening opportunities, decide where a seam goes, make code more testable or AI-navigable, or when another skill needs the deep-module vocabulary.
+description: Design code architecture and user interfaces with deliberate structure and visual judgment. Use for deep modules, seams, testable interfaces, UI hierarchy, layout, interaction states, accessibility, or when another skill needs design vocabulary.
 ---
 
 # Codebase Design
 
-Design **deep modules**: a lot of behaviour behind a small interface, placed at a clean seam, testable through that interface. Use this language and these principles wherever code is being designed or restructured. The aim is leverage for callers, locality for maintainers, and testability for everyone.
+Design code architecture and UI with deliberate judgment. For architecture, create **deep modules**: a lot of behaviour behind a small interface, placed at a clean seam and tested through that interface. For UI, establish hierarchy, layout, typography, interaction states, responsive behavior, and accessibility before polishing details.
+
+## UI design
+
+- Start from the product's purpose and existing design language. Do not impose a generic visual style.
+- Define information hierarchy first: primary action, supporting actions, content order, and empty/loading/error states.
+- Prefer a small number of strong visual decisions over decorative noise.
+- Treat spacing, typography, color, motion, and responsive behavior as one system.
+- Preserve accessibility: semantic controls, keyboard operation, visible focus, contrast, readable density, and reduced-motion behavior.
+- When the right UI is unclear, call the Skill tool with "prototype" and compare materially different approaches through a runnable artifact.
 
 ## Glossary
 

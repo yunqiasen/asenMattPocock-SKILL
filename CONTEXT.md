@@ -1,30 +1,37 @@
-# Matt Pocock Skills
+# asenMattPocock Skills
 
-A collection of agent skills (slash commands and behaviors) loaded by Claude Code. Skills are organized into buckets and consumed by per-repo configuration emitted by `/setup-matt-pocock-skills`.
+本仓库维护一组供 AI Agent 使用的工程 Skill。Skill 是可安装的 Agent 指令集，按客户端和安装范围写入目标项目或用户级 Skill 目录。
 
 ## Language
 
-**Issue tracker**:
-The tool that hosts a repo's issues: GitHub Issues, Linear, a local `.scratch/` markdown convention, or similar. Skills like `to-tickets`, `to-spec`, and `triage` read from and write to it.
-_Avoid_: backlog manager, backlog backend, issue host
+**Skill**:
+一个带有 `SKILL.md` 的 Agent 指令集，可被客户端自动调用，也可以由用户手动调用。
+_Avoid_: 普通提示词、脚本插件
 
-**Issue**:
-A single tracked unit of work inside an **Issue tracker**: a bug, task, spec, or slice produced by `to-tickets`.
-_Avoid_: ticket (use only when quoting external systems that call them tickets, or for a **Decision ticket**, see below)
+**自动调用**:
+客户端或模型根据 Skill 的描述和触发条件主动使用它。
+_Avoid_: 强制调用
 
-**Decision ticket**:
-A `wayfinder` unit: a child **Issue** of a `wayfinder:map` holding a *question* whose resolution is a decision, not a slice of a build to execute. The **decision** qualifier is what keeps it distinct from an implementation ticket; `wayfinder` introduces the term, then uses "ticket".
+**手动调用**:
+只有用户明确选择或输入 Skill 名称时才使用它。
+_Avoid_: 自动 Skill
 
-**Triage role**:
-A canonical state-machine label applied to an **Issue** during triage (e.g. `needs-triage`, `ready-for-afk`). Each role maps to a real label string in the **Issue tracker** via `docs/agents/triage-labels.md`.
+**项目级安装**:
+只对当前项目生效的安装，写入项目内客户端识别的 Skill 目录。
+_Avoid_: 局部复制
 
-## Relationships
+**全局安装**:
+对用户所有项目生效的安装，写入客户端的用户级 Skill 目录。
+_Avoid_: 系统安装
 
-- An **Issue tracker** holds many **Issues**
-- An **Issue** carries one **Triage role** at a time
-- A **Decision ticket** is an **Issue** (a child of a `wayfinder:map`)
+**Skill 依赖**:
+一个 Skill 正常工作前必须同时安装的其他 Skill。依赖关系统一记录在 `skills/manifest.json`。
+_Avoid_: 隐式复制
 
-## Flagged ambiguities
+**目标项目**:
+真正使用 Skill 的项目目录，不是本 Skill 仓库目录。
+_Avoid_: 安装源
 
-- "backlog" was previously used to mean both the *tool* hosting issues and the *body of work* inside it. Resolved: the tool is the **Issue tracker**; "backlog" is no longer used as a domain term.
-- "backlog backend" / "backlog manager". Resolved: collapsed into **Issue tracker**.
+**安装源**:
+提供 Skill 文件的仓库和分支。本项目开发期间使用 `develop` 分支。
+_Avoid_: 目标项目

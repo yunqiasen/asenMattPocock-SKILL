@@ -1,0 +1,23 @@
+{
+  "repository": "yunqiasen/asenMattPocock-SKILL",
+  "developmentBranch": "develop",
+  "skills": {
+    "grilling": { "bucket": "productivity", "invocation": "automatic", "dependsOn": [] },
+    "grill-me": { "bucket": "productivity", "invocation": "manual", "dependsOn": ["grilling"] },
+    "grill-with-docs": { "bucket": "engineering", "invocation": "manual", "dependsOn": ["grilling", "domain-modeling"] },
+    "domain-modeling": { "bucket": "engineering", "invocation": "automatic", "dependsOn": [] },
+    "wayfinder": { "bucket": "engineering", "invocation": "manual", "dependsOn": ["setup-matt-pocock-skills", "grilling", "domain-modeling", "research", "prototype"] },
+    "setup-matt-pocock-skills": { "bucket": "engineering", "invocation": "manual", "dependsOn": [] },
+    "tdd": { "bucket": "engineering", "invocation": "automatic", "dependsOn": ["codebase-design"] },
+    "code-review": { "bucket": "engineering", "invocation": "automatic", "dependsOn": ["setup-matt-pocock-skills"] },
+    "ask-matt": { "bucket": "engineering", "invocation": "manual", "dependsOn": ["grilling", "grill-me", "grill-with-docs", "domain-modeling", "wayfinder", "setup-matt-pocock-skills", "tdd", "code-review", "to-spec", "to-tickets", "implement", "diagnosing-bugs", "research", "improve-codebase-architecture", "codebase-design", "prototype"] },
+    "to-spec": { "bucket": "engineering", "invocation": "manual", "dependsOn": ["setup-matt-pocock-skills"] },
+    "to-tickets": { "bucket": "engineering", "invocation": "manual", "dependsOn": ["setup-matt-pocock-skills"] },
+    "implement": { "bucket": "engineering", "invocation": "manual", "dependsOn": ["tdd", "code-review"] },
+    "diagnosing-bugs": { "bucket": "engineering", "invocation": "automatic", "dependsOn": [] },
+    "research": { "bucket": "engineering", "invocation": "automatic", "dependsOn": [] },
+    "improve-codebase-architecture": { "bucket": "engineering", "invocation": "manual", "dependsOn": ["codebase-design", "grilling", "domain-modeling"] },
+    "codebase-design": { "bucket": "engineering", "invocation": "automatic", "dependsOn": [] },
+    "prototype": { "bucket": "engineering", "invocation": "automatic", "dependsOn": [] }
+  }
+}

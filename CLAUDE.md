@@ -1,25 +1,32 @@
-Skills are organized into bucket folders under `skills/`:
+# asenMattPocock Skills
 
-- `engineering/`: daily code work
-- `productivity/`: daily non-code workflow tools
-- `misc/`: kept around but rarely used, not promoted
-- `in-progress/`: beta: public on purpose, feedback wanted, not shipped in the plugin
-- `deprecated/`: no longer used
+这是一个只维护 17 个 Agent Skill 的二开仓库。不要恢复上游已删除的发布系统、官网文档、实验 Skill 或杂项 Skill。
 
-Every skill in `engineering/` or `productivity/` (the **promoted** buckets) must have a reference in the top-level `README.md` and an entry in `.claude-plugin/plugin.json`'s `skills` array (the Claude Code plugin ships exactly the promoted set). Skills in `misc/`, `in-progress/`, and `deprecated/` must not appear in either.
+## 目录约束
 
-Install commands are copied verbatim from [.agents/install-block.md](./.agents/install-block.md). `.claude-plugin/marketplace.json` makes the repo its own single-plugin marketplace (a fallback the install block explains, not the documented route). Run `claude plugin validate . --strict` after touching either manifest. Why a Claude plugin but not (yet) a Codex one lives in [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md).
+- `skills/manifest.json` 是 Skill 名称、调用模式和依赖关系的唯一清单。
+- `skills/engineering/` 放工程 Skill，`skills/productivity/` 放通用工作流 Skill。
+- 每个 Skill 必须包含 `SKILL.md` 和 `agents/openai.yaml`。
+- Skill 的调用模式必须同时同步：`SKILL.md` 的 `disable-model-invocation` 和 `agents/openai.yaml` 的 `policy.allow_implicit_invocation`。
+- 自动调用 Skill 不得设置 `disable-model-invocation: true`。
+- 手动调用 Skill 必须设置 `disable-model-invocation: true`，并在 `agents/openai.yaml` 设置 `policy.allow_implicit_invocation: false`。
+- `scripts/install-skills.sh` 是对外安装入口。它必须按 `skills/manifest.json` 自动展开依赖，支持项目级、全局、Claude Code 和 Codex。
+- 修改 Skill 调用关系时，同时更新 `skills/manifest.json`、相关 Skill 的 `SKILL.md` 和 README 索引。
+- 所有会落到目标项目的配置都必须使用目标项目自己的路径，不要写死本仓库路径。
 
-Each skill entry in the top-level `README.md` must link the skill name to its `SKILL.md`.
+## 17 个 Skill
 
-Each bucket folder has a `README.md` that lists every skill in the bucket with a one-line description, with the skill name linked to its `SKILL.md`. The promoted buckets' `README.md`s and the top-level `README.md` group entries into **User-invoked** and **Model-invoked**; non-promoted bucket `README.md`s (`misc/`, `in-progress/`) use a flat list.
+自动调用：`grilling`、`domain-modeling`、`tdd`、`code-review`、`diagnosing-bugs`、`research`、`codebase-design`、`prototype`。
 
-Skills in `engineering/` and `productivity/` also have a human-facing docs page at `docs/<bucket>/<skill-name>.md` (the docs tree mirrors those two bucket folders under `skills/`). The published URL is `https://aihero.dev/skills-<skill-name>` regardless of bucket: the docs path is repo organisation only. When you add, rename, or change the behaviour of a skill in `engineering/` or `productivity/`, create or re-sync its docs page following [.agents/writing-docs.md](./.agents/writing-docs.md). A finished page carries four sections: **What it does**, **When to reach for it**, **Common questions**, and **It's working if**. `writing-docs.md` holds the template, the section order, and where to hunt for the questions. Skills in the non-promoted buckets (`misc/`, `in-progress/`, `deprecated/`) get **no** docs page.
+手动调用：`grill-me`、`grill-with-docs`、`wayfinder`、`setup-matt-pocock-skills`、`ask-matt`、`to-spec`、`to-tickets`、`implement`、`improve-codebase-architecture`。
 
-Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `policy.allow_implicit_invocation: false` in `agents/openai.yaml`, reachable only by the human) or model-invoked (model- or user-reachable). See [.agents/invocation.md](./.agents/invocation.md).
+## 验证
 
-[`ask-matt`](./skills/engineering/ask-matt/SKILL.md) is the router that maps every user-reachable skill and how they relate. The same trigger that re-syncs a docs page applies to it: whenever you add, rename, remove, or change how a user-reachable skill fits the flows, re-read `ask-matt`'s `SKILL.md` and update it so the map stays accurate: a new skill it never mentions, or a stale one it still routes to, is a router that lies.
+修改后至少执行：
 
-To (re)link every skill into the local harness skill directories (`~/.claude/skills`, `~/.agents/skills`), run `scripts/link-skills.sh`. Each entry is a symlink into this repo, so a `git pull` keeps installed skills current; re-run the script after adding, removing, or renaming a skill.
+```bash
+scripts/install-skills.sh --help
+scripts/install-skills.sh --list
+```
 
-No em-dashes anywhere in this repo's prose (`SKILL.md` files, docs, `README.md`, `CHANGELOG.md`, ADRs, changesets, code comments). Where a sentence reaches for one, rewrite it instead with a comma, colon, period, parentheses, or a conjunction, whichever the sentence actually wants; never do a blind character substitution.
+并在临时 Git 项目中验证 Claude Code 和 Codex 的项目级、全局安装路径。最终检查 `git status`、Skill 数量、Manifest 中的 17 个名称和 README 安装命令。
