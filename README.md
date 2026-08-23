@@ -1,6 +1,6 @@
 # asenMattPocock Skills
 
-面向 AI Agent 的工程 Skill 集合。当前只维护 17 个 Skill，分为自动调用和手动调用两类。
+面向 AI Agent 的工程 Skill 集合。当前只维护 17 个 Skill，分为自动调用基础、手动调用入口和确认门工作流节点。
 
 ## 安装
 
@@ -78,7 +78,6 @@ cd "/Users/yunqiroot/Desktop/项目/中"
 npx skills@latest add \
   "https://github.com/yunqiasen/asenMattPocock-SKILL/tree/develop" \
   --agent codex \
-  --skill grill-me \
   --skill grilling \
   --copy \
   --yes
@@ -98,12 +97,18 @@ npx skills@latest add \
 
 ```text
 grill-me
-└── grilling
+├── grilling
+└── tdd
+    ├── codebase-design
+    │   └── prototype
+    └── code-review
 
 implement
 ├── setup-matt-pocock-skills
 ├── tdd
-│   └── codebase-design
+│   ├── codebase-design
+│   │   └── prototype
+│   └── code-review
 └── code-review
 ```
 
@@ -111,46 +116,135 @@ implement
 
 ## Skill 分类
 
-### 自动调用
+### 自动调用基础 Skill
 
 - [`grilling`](skills/productivity/grilling/SKILL.md)：底层通用拷问逻辑
 - [`domain-modeling`](skills/engineering/domain-modeling/SKILL.md)：维护项目领域词汇、`CONTEXT.md` 和 ADR
-- [`tdd`](skills/engineering/tdd/SKILL.md)：失败测试、最小实现、重构、提交
+- [`tdd`](skills/engineering/tdd/SKILL.md)：失败测试、最小实现、重构、提交；独立运行时调用一次 `code-review`
 - [`code-review`](skills/engineering/code-review/SKILL.md)：标准轴和规格轴双轴审查
-- [`diagnosing-bugs`](skills/engineering/diagnosing-bugs/SKILL.md)：复现、最小化、假设、修复、回归测试
+- [`diagnosing-bugs`](skills/engineering/diagnosing-bugs/SKILL.md)：复现、最小化、假设、修复、回归测试，确认后调用一次 `code-review`
 - [`research`](skills/engineering/research/SKILL.md)：基于高可信一手资料调研并生成引用 Markdown
 - [`codebase-design`](skills/engineering/codebase-design/SKILL.md)：Deep Module、接口、Seam 和架构设计词汇
 - [`prototype`](skills/engineering/prototype/SKILL.md)：用原型回答逻辑或 UI 设计问题
 
-### 手动调用
+### 手动调用入口
 
 - [`grill-me`](skills/productivity/grill-me/SKILL.md)：不绑定代码库的通用拷问
 - [`grill-with-docs`](skills/engineering/grill-with-docs/SKILL.md)：绑定代码库并产出 `CONTEXT.md`、ADR
 - [`wayfinder`](skills/engineering/wayfinder/SKILL.md)：大任务探索地图和调查 Ticket
 - [`setup-matt-pocock-skills`](skills/engineering/setup-matt-pocock-skills/SKILL.md)：项目初始化和工作流配置
 - [`ask-matt`](skills/engineering/ask-matt/SKILL.md)：Skill 路由
-- [`to-spec`](skills/engineering/to-spec/SKILL.md)：对话转正式规格说明书
-- [`to-tickets`](skills/engineering/to-tickets/SKILL.md)：规格转 Tracer Bullet 垂直切片
-- [`implement`](skills/engineering/implement/SKILL.md)：按规格实施，内部驱动 TDD，最后调用代码审查
 - [`improve-codebase-architecture`](skills/engineering/improve-codebase-architecture/SKILL.md)：扫描 Deep Module 优化机会并生成 HTML 报告
 
-## 推荐工作流
+### 可手动启动、也可被上游调用
+
+- [`to-spec`](skills/engineering/to-spec/SKILL.md)：对话转正式规格说明书，确认后内部进入 `to-tickets`
+- [`to-tickets`](skills/engineering/to-tickets/SKILL.md)：规格转 Tracer Bullet 垂直切片，确认后内部进入 `implement`
+- [`implement`](skills/engineering/implement/SKILL.md)：按规格实施，内部驱动 TDD，忽略 TDD 的审查交接，由自身统一调用一次代码审查
+
+## 六条工作流
+
+### 1. 简单任务
 
 ```text
-setup-matt-pocock-skills
-          ↓
-  grill-with-docs / grill-me
-          ↓
-       to-spec
-          ↓
-      to-tickets
-          ↓
-      implement
-       ↙     ↘
-     tdd   code-review
+grill-me -> grilling -> 用户确认
+  -> 小型明确代码改动：tdd -> code-review
+  -> 纯决策/文档/规划：输出结论后结束
 ```
 
-模糊且规模很大的任务先用 `wayfinder`。明确的 bug 直接使用 `diagnosing-bugs`。需要回答架构或 UI 设计问题时使用 `prototype`。
+`grill-me` 不绑定代码库。需要维护 `CONTEXT.md` 或 ADR 时改用 `grill-with-docs`。独立运行的 `tdd` 只调用一次 `code-review`。
+
+### 2. 代码库内的标准开发
+
+```text
+grill-with-docs
+  -> 用户确认对齐结果
+  -> to-spec
+  -> 用户确认 spec
+  -> to-tickets
+  -> 用户确认 frontier ticket
+  -> implement
+  -> tdd
+  -> code-review
+```
+
+`implement` 调用 `tdd` 时，TDD 不调用 `code-review`；由 `implement` 在全部切片、类型检查和全量测试通过后统一调用一次。
+
+### 3. 模糊且规模很大的任务
+
+```text
+wayfinder
+  -> 确定 destination
+  -> 创建并解决 decision tickets
+  -> research / prototype / grilling / domain-modeling
+  -> 地图清空
+  -> to-spec
+  -> 用户确认 spec
+  -> to-tickets
+  -> 用户确认 frontier ticket
+  -> implement -> tdd -> code-review
+```
+
+`wayfinder` 只解决决策，不实现业务功能。它的 Ticket 不是实现 Ticket。
+
+### 4. 架构改进
+
+```text
+improve-codebase-architecture
+  -> 扫描代码库
+  -> 生成 architecture-review HTML 报告
+  -> 用户选择候选
+  -> grilling + domain-modeling
+  -> 重构决策方案
+  -> to-spec
+  -> 用户确认 spec
+  -> to-tickets
+  -> 用户确认 frontier ticket
+  -> implement -> tdd -> code-review
+```
+
+`improve-codebase-architecture` 不直接调用 `implement`，也不直接修改代码。重构决策必须经过 `to-spec -> to-tickets` 才进入实现。
+
+### 5. Bug 调试
+
+```text
+diagnosing-bugs
+  -> 复现
+  -> 最小化
+  -> 生成并验证假设
+  -> 修复和回归测试
+  -> 用户确认审查
+  -> code-review
+  -> 修复有效审查意见
+  -> 提交
+```
+
+本流程只运行一次 `code-review`。用户拒绝审查确认时，停止在提交前。
+
+### 6. 研究后开发
+
+```text
+research
+  -> research/*.md（高可信一手资料和引用）
+  -> grill-with-docs
+  -> 用户确认对齐结果
+  -> to-spec
+  -> 用户确认 spec
+  -> to-tickets
+  -> 用户确认 frontier ticket
+  -> implement -> tdd -> code-review
+```
+
+## 工作流调用规则
+
+- `SKILL.md` 中的 `Call the Skill tool with "name"` 才是运行时内部调用
+- `skills/manifest.json` 的 `dependsOn` 只用于安装时展开依赖闭包，不代表执行顺序
+- `to-spec`、`to-tickets`、`implement` 是可手动启动、也可被上游 Skill 内部调用的确认门工作流节点
+- `tdd` 独立运行时调用一次 `code-review`；被 `implement` 调用时跳过内部审查
+- `diagnosing-bugs` 在用户确认后调用一次 `code-review`
+- `wayfinder` 和 `improve-codebase-architecture` 完成决策后都回到 `to-spec`，不能直接跳到 `implement`
+
+项目初始化仍由 `setup-matt-pocock-skills` 单独执行，不计入六条工作流。明确的 bug 直接使用 `diagnosing-bugs`。需要单独回答架构或 UI 设计问题时使用 `codebase-design` 或 `prototype`。
 
 ## 最终目录
 

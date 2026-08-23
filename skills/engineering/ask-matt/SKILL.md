@@ -12,15 +12,15 @@ Use this router when the user does not know which skill fits the task.
 
 1. Run `/setup-matt-pocock-skills` once for a new codebase.
 2. Use `/grill-with-docs` for repository-bound planning. It invokes `grilling` and `domain-modeling` and records `CONTEXT.md` and ADR decisions.
-3. Use `/to-spec` when the conversation is settled and needs a formal specification.
-4. Use `/to-tickets` when the work must be split into tracer-bullet vertical slices with blocking edges.
-5. Use `/implement` to build from a spec or ticket. It invokes `tdd`, then `code-review`.
+3. Use `to-spec` when the conversation is settled and needs a formal specification. After the user confirms the spec, it calls `to-tickets`.
+4. Use `to-tickets` when the work must be split into tracer-bullet vertical slices with blocking edges. After the user confirms the frontier ticket, it calls `implement` for one ticket.
+5. `implement` builds from the confirmed spec or ticket. It invokes `tdd`, ignores TDD's nested review handoff, then calls `code-review` once for the complete ticket.
 
-For a small, already-clear change, go directly to `/implement`.
+For a small, already-clear change, use `tdd` directly. It calls `code-review` once after its final checks.
 
 ## Large or unclear work
 
-Use `/wayfinder` when the destination is clear enough to name but the route is too foggy or too large for one session. It creates a map and resolves research, prototype, grilling, and task tickets one at a time. When the route is clear, continue with `/to-spec`.
+Use `/wayfinder` when the destination is clear enough to name but the route is too foggy or too large for one session. It creates a map and resolves research, prototype, grilling, and task tickets one at a time. When the route is clear, continue with `to-spec`, then its confirmed downstream chain.
 
 ## Standalone choices
 
@@ -40,11 +40,20 @@ Use `/wayfinder` when the destination is clear enough to name but the route is t
 - `grilling`: the reusable interview primitive.
 - `domain-modeling`: maintains domain vocabulary, `CONTEXT.md`, and ADRs.
 - `codebase-design`: supplies deep-module, interface, seam, and UI design vocabulary.
-- `tdd`: runs red, green, refactor, commit.
+- `tdd`: runs red, green, refactor, commit, then one standalone code review.
 - `code-review`: reviews standards and specification compliance in parallel.
 - `diagnosing-bugs`: runs reproduce, minimize, hypothesize, fix, regression-test.
 - `research`: produces a cited Markdown research artifact.
 - `prototype`: answers design questions with throwaway logic or UI artifacts.
+
+## Workflow boundaries
+
+- `grill-with-docs` ends its alignment phase at a confirmation gate, then calls `to-spec` when the user approves.
+- `wayfinder` ends when the decision map is clear; it does not implement decision tickets.
+- `improve-codebase-architecture` ends at a settled refactoring decision; it does not modify code or call `implement`.
+- `to-spec` and `to-tickets` pause at confirmation gates before their downstream calls.
+- `implement` is the only owner of the final review in its run; nested TDD review is ignored.
+- `diagnosing-bugs` calls `code-review` once after its review gate and before commit.
 
 ## Boundary rule
 

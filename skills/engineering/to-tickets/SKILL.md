@@ -1,7 +1,6 @@
 ---
 name: to-tickets
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker (edges as text in one file per ticket locally, or native blocking links on a real tracker).
-disable-model-invocation: true
+description: Break an approved plan or spec into tracer-bullet tickets with blocking edges, publish them to the configured tracker, and after user confirmation continue to implement one frontier ticket. Use when settled work needs an implementation breakdown.
 ---
 
 # To Tickets
@@ -103,3 +102,11 @@ The end-to-end behaviour this ticket makes work, from the user's perspective, no
 </issue-template>
 
 In either form, avoid specific file paths or code snippets: they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
+
+### 6. Implementation confirmation gate
+
+After publishing, show the first unblocked frontier ticket and ask the user to confirm that implementation may start for that ticket
+
+- Only after explicit confirmation, call the Skill tool with "implement" for exactly one frontier ticket
+- Do not start every ticket automatically. Each later ticket gets its own frontier check and confirmation
+- If the user rejects the breakdown or wants to change the order, revise the tickets before calling `implement`

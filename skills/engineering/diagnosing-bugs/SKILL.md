@@ -17,6 +17,8 @@ If the redacted output is not enough to diagnose the bug, say so and ask the use
 
 ## Phase 1: Build a feedback loop
 
+Capture the current `HEAD` as the fixed point before modifying the code. Preserve it for the final `code-review` call
+
 **This is the skill.** Everything else is mechanical. If you have a **tight** pass/fail signal for the bug (one that goes red on _this_ bug), you will find the cause; bisection, hypothesis-testing, and instrumentation all just consume it. If you don't have one, no amount of staring at code will save you.
 
 Spend disproportionate effort here. **Be aggressive. Be creative. Refuse to give up.**
@@ -136,3 +138,11 @@ Required before declaring done:
 - [ ] All `[DEBUG-...]` instrumentation removed (`grep` the prefix)
 - [ ] Throwaway prototypes deleted (or moved to a clearly-marked debug location)
 - [ ] The hypothesis that turned out correct is stated in the commit / PR message, so the next debugger learns
+
+## Phase 7: Review gate
+
+Before declaring the fix complete, present the reproduced symptom, the minimised case, the regression result, and the fixed point for the diff. Ask the user to confirm that the repair should enter review
+
+- After explicit confirmation, call the Skill tool with "code-review" exactly once
+- Fix valid review findings and rerun the regression checks, but do not call `code-review` a second time in this diagnosing run
+- Commit the repaired change after review findings are resolved. If the user declines the gate, stop before committing and report the verified repair state

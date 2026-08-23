@@ -1,7 +1,6 @@
 ---
 name: to-spec
-description: "Turn the current conversation into a spec and publish it to the project issue tracker: no interview, just synthesis of what you've already discussed."
-disable-model-invocation: true
+description: "Turn an agreed conversation into a formal spec, publish it to the project issue tracker, and after user confirmation continue to to-tickets. Use when the plan is settled and needs a written specification."
 ---
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know.
@@ -73,3 +72,7 @@ A description of the things that are out of scope for this spec.
 Any further notes about the feature.
 
 </spec-template>
+
+4. Open a confirmation gate. Show the published spec reference, the chosen seams, and the remaining scope. Ask the user to confirm that the spec is ready to split into implementation tickets.
+
+5. Only after explicit confirmation, call the Skill tool with "to-tickets". If the user rejects the spec, revise it and repeat this gate. Do not call "to-tickets" before confirmation.

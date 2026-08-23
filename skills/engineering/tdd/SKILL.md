@@ -38,3 +38,11 @@ When the shape of that interface is itself in question (how deep the module is, 
 - **Refactor while green.** Improve names, structure, duplication, and module depth without changing behavior. Run focused tests after each meaningful refactor.
 - **Commit the slice.** Commit only after red, green, refactor, and relevant checks pass. Each commit represents one coherent behavior slice.
 - **One slice at a time.** One seam, one failing test, one minimal implementation, one refactor, one commit per cycle.
+
+## Review handoff
+
+This skill owns at most one `code-review` call per standalone TDD run
+
+- When TDD is invoked directly or by a workflow other than `implement`, capture the fixed point before the first slice, complete all slices, and call the Skill tool with "code-review" exactly once after the final checks pass
+- When TDD is invoked by `implement`, do not execute the `code-review` step here. Return control to `implement`, which owns the single review for the complete ticket
+- If the invocation context is unclear, do not start a second review. Ask which skill owns the current run's final review

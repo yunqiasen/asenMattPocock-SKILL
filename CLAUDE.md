@@ -10,15 +10,18 @@
 - Skill 的调用模式必须同时同步：`SKILL.md` 的 `disable-model-invocation` 和 `agents/openai.yaml` 的 `policy.allow_implicit_invocation`。
 - 自动调用 Skill 不得设置 `disable-model-invocation: true`。
 - 手动调用 Skill 必须设置 `disable-model-invocation: true`，并在 `agents/openai.yaml` 设置 `policy.allow_implicit_invocation: false`。
+- 可手动启动且允许被上游 Skill 调用的工作流节点，不设置 `disable-model-invocation: true`；它们通过确认门保留人工控制。
 - `scripts/install-skills.sh` 是对外安装入口。它必须按 `skills/manifest.json` 自动展开依赖，支持项目级、全局、Claude Code 和 Codex。
 - 修改 Skill 调用关系时，同时更新 `skills/manifest.json`、相关 Skill 的 `SKILL.md` 和 README 索引。
 - 所有会落到目标项目的配置都必须使用目标项目自己的路径，不要写死本仓库路径。
 
 ## 17 个 Skill
 
-自动调用：`grilling`、`domain-modeling`、`tdd`、`code-review`、`diagnosing-bugs`、`research`、`codebase-design`、`prototype`。
+自动调用基础 Skill：`grilling`、`domain-modeling`、`tdd`、`code-review`、`diagnosing-bugs`、`research`、`codebase-design`、`prototype`。
 
-手动调用：`grill-me`、`grill-with-docs`、`wayfinder`、`setup-matt-pocock-skills`、`ask-matt`、`to-spec`、`to-tickets`、`implement`、`improve-codebase-architecture`。
+手动调用入口：`grill-me`、`grill-with-docs`、`wayfinder`、`setup-matt-pocock-skills`、`ask-matt`、`improve-codebase-architecture`。
+
+可手动启动且可被上游调用：`to-spec`、`to-tickets`、`implement`。
 
 ## 验证
 
