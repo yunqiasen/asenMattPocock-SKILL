@@ -4,7 +4,7 @@ set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 MANIFEST="$REPO/skills/manifest.json"
 RESOLVER="$REPO/scripts/resolve-skills.mjs"
-DEFAULT_SOURCE="https://github.com/yunqiasen/asenMattPocock-SKILL/tree/MattPocock-Fork"
+DEFAULT_SOURCE="https://github.com/yunqiasen/asenMattPocock-SKILL.git#MattPocock-Fork"
 
 usage() {
   printf '%s\n' \
@@ -21,13 +21,13 @@ usage() {
     '  --global          Install for the current user across projects.' \
     '  --agent <name>    Repeat for claude-code and/or codex.' \
     '  --skill <name>    Repeat to select one or more skills.' \
-    '  --workflow <name>  Repeat to install a named workflow and its full dependency closure.' \
-    '  --skip-prerequisites  Omit one-time setup skills for an already initialized project.' \
+    '  --workflow <name> Repeat to install a named workflow and its required skills.' \
+    '  --with-optional   Include optional conditional-path skills for selected workflows.' \
     '  --all             Install all 16 skills.' \
     '  --source <value>  Override the GitHub source or use a local checkout.' \
     '  --symlink         Use symlinks when supported instead of copies.' \
     '  --list            List the 16 skills and their dependencies.' \
-    '  --list-workflows  List workflow entries, prerequisites, counts and install closures.' \
+    '  --list-workflows  List workflow required/optional skill closures.' \
     '  --help            Show this help.'
 }
 
@@ -38,11 +38,11 @@ copy=true
 list=false
 all=false
 list_workflows=false
-skip_prerequisites=false
+with_optional=false
 agents=()
 requested=()
 workflows=()
-prerequisites=()
+optional_skills=()
 
 while (($# > 0)); do
   case "$1" in
@@ -73,8 +73,8 @@ while (($# > 0)); do
       workflows+=("$2")
       shift 2
       ;;
-    --skip-prerequisites)
-      skip_prerequisites=true
+    --with-optional)
+      with_optional=true
       shift
       ;;
     --all)
@@ -117,7 +117,7 @@ if "$list"; then
 fi
 
 if "$list_workflows"; then
-  printf 'NAME\tENTRY_SKILLS\tPREREQUISITES\tCOUNT\tINSTALLS\n'
+  printf 'NAME\tREQUIRED_COUNT\tOPTIONAL_COUNT\tREQUIRED\tOPTIONAL\tFULL_COUNT\n'
   node "$RESOLVER" "$MANIFEST" list-workflows
   exit 0
 fi
@@ -146,24 +146,24 @@ if ((${#requested[@]} > 0)) && ((${#workflows[@]} > 0)); then
   echo "Use either --skill or --workflow, not both." >&2
   exit 2
 fi
-if "$skip_prerequisites" && ((${#workflows[@]} == 0)); then
-  echo "--skip-prerequisites requires --workflow." >&2
+if "$with_optional" && ((${#workflows[@]} == 0)); then
+  echo "--with-optional requires --workflow." >&2
   exit 2
 fi
 
 if ((${#workflows[@]} > 0)); then
-  workflow_mode="workflow-all"
-  if "$skip_prerequisites"; then workflow_mode="workflow"; fi
+  workflow_mode="workflow"
+  if "$with_optional"; then workflow_mode="workflow-optional"; fi
   workflow_roots="$(node "$RESOLVER" "$MANIFEST" "$workflow_mode" "${workflows[@]}")"
   while IFS= read -r name; do
     requested+=("$name")
   done <<< "$workflow_roots"
 
-  workflow_prerequisites="$(node "$RESOLVER" "$MANIFEST" workflow-prerequisites "${workflows[@]}")"
-  if [[ -n "$workflow_prerequisites" ]]; then
+  workflow_optional_skills="$(node "$RESOLVER" "$MANIFEST" workflow-optional-skills "${workflows[@]}")"
+  if [[ -n "$workflow_optional_skills" ]]; then
     while IFS= read -r name; do
-      prerequisites+=("$name")
-    done <<< "$workflow_prerequisites"
+      optional_skills+=("$name")
+    done <<< "$workflow_optional_skills"
   fi
 fi
 
@@ -199,11 +199,11 @@ printf 'Agents: %s\n' "${agents[*]}"
 if ((${#workflows[@]} > 0)); then
   printf 'Workflows: %s\n' "${workflows[*]}"
 fi
-if ((${#prerequisites[@]} > 0)); then
-  if "$skip_prerequisites"; then
-    printf 'Prerequisites skipped (project must already be initialized): %s\n' "${prerequisites[*]}"
+if ((${#optional_skills[@]} > 0)); then
+  if "$with_optional"; then
+    printf 'Optional skills included: %s\n' "${optional_skills[*]}"
   else
-    printf 'Prerequisites included (run once for a new project): %s\n' "${prerequisites[*]}"
+    printf 'Optional skills omitted (add --with-optional to include): %s\n' "${optional_skills[*]}"
   fi
 fi
 if "$global_install"; then

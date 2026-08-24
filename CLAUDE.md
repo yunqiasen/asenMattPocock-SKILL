@@ -20,8 +20,9 @@
 - 自动 + 手动 Skill 不得设置 `disable-model-invocation: true`；Agent 可以自动选择，用户也可以明确启动。
 - 仅手动 Skill 必须设置 `disable-model-invocation: true`，并在 `agents/openai.yaml` 设置 `policy.allow_implicit_invocation: false`。
 - 自动 + 手动的工作流节点通过确认门保留人工控制，允许被上游 Skill 调用，也允许用户直接启动。
-- `scripts/install-skills.sh` 是对外安装入口。它必须按 `skills/manifest.json` 自动展开 Skill 或 `--workflow` 的完整依赖闭包，支持项目级、全局、Claude Code 和 Codex。
-- 工作流的一次性初始化 Skill 记录在 `workflows.<name>.prerequisites`，默认随工作流安装；已初始化项目可用 `--skip-prerequisites` 省略。不要把一次性前置项混入运行时 `dependsOn`。
+- `scripts/install-skills.sh` 是对外安装入口。它必须按 `skills/manifest.json` 自动展开 Skill 或 `--workflow` 的必需依赖闭包，支持项目级、全局、Claude Code 和 Codex。
+- 条件分支 Skill 记录在 `workflows.<name>.optionalSkills`，只有 `--with-optional` 才随工作流安装。不要把条件调用混入必需的运行时 `dependsOn`。
+- `setup-matt-pocock-skills` 是独立的一次性项目初始化 Skill，不属于六条工作流闭包，也不由工作流自动安装。新项目需要 issue tracker 或领域文档配置时单独安装和运行。
 - 修改 Skill 调用关系或工作流入口时，同时更新 `skills/manifest.json`、相关 Skill 的 `SKILL.md` 和 README 表格。
 - 所有会落到目标项目的配置都必须使用目标项目自己的路径，不要写死本仓库路径。
 
