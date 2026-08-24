@@ -1,6 +1,6 @@
 # asenMattPocock Skills
 
-这是一个只维护 17 个 Agent Skill 的二开仓库。不要恢复上游已删除的发布系统、官网文档、实验 Skill 或杂项 Skill。
+这是一个只维护 16 个 Agent Skill 的二开仓库。不要恢复上游已删除的发布系统、官网文档、实验 Skill 或杂项 Skill。
 
 ## 目录约束
 
@@ -15,11 +15,11 @@
 - 修改 Skill 调用关系时，同时更新 `skills/manifest.json`、相关 Skill 的 `SKILL.md` 和 README 索引。
 - 所有会落到目标项目的配置都必须使用目标项目自己的路径，不要写死本仓库路径。
 
-## 17 个 Skill
+## 16 个 Skill
 
 自动调用基础 Skill：`grilling`、`domain-modeling`、`tdd`、`code-review`、`diagnosing-bugs`、`research`、`codebase-design`、`prototype`。
 
-手动调用入口：`grill-me`、`grill-with-docs`、`wayfinder`、`setup-matt-pocock-skills`、`ask-matt`、`improve-codebase-architecture`。
+手动调用入口：`grill-with-docs`、`wayfinder`、`setup-matt-pocock-skills`、`ask-matt`、`improve-codebase-architecture`。
 
 可手动启动且可被上游调用：`to-spec`、`to-tickets`、`implement`。
 
@@ -32,4 +32,4 @@ scripts/install-skills.sh --help
 scripts/install-skills.sh --list
 ```
 
-并在临时 Git 项目中验证 Claude Code 和 Codex 的项目级、全局安装路径。最终检查 `git status`、Skill 数量、Manifest 中的 17 个名称和 README 安装命令。
+并在临时 Git 项目中验证 Claude Code 和 Codex 的项目级、全局安装路径。最终检查 `git status`、Skill 数量、Manifest 中的 16 个名称和 README 安装命令。

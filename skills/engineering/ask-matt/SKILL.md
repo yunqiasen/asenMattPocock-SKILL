@@ -16,7 +16,7 @@ Use this router when the user does not know which skill fits the task.
 4. Use `to-tickets` when the work must be split into tracer-bullet vertical slices with blocking edges. After the user confirms the frontier ticket, it calls `implement` for one ticket.
 5. `implement` builds from the confirmed spec or ticket. It invokes `tdd`, ignores TDD's nested review handoff, then calls `code-review` once for the complete ticket.
 
-For a small, already-clear change, use `tdd` directly. It calls `code-review` once after its final checks.
+For a small task, start with `grilling`. After the user confirms the shared understanding, it enters the minimal execution flow: `tdd`, then one `code-review`.
 
 ## Large or unclear work
 
@@ -26,7 +26,7 @@ Use `/wayfinder` when the destination is clear enough to name but the route is t
 
 | Situation | Skill |
 | --- | --- |
-| General interview with no codebase | `/grill-me` |
+| Small task or general interview with no codebase | `grilling` |
 | Repository interview with domain documents | `/grill-with-docs` |
 | Hard bug or performance regression | `diagnosing-bugs` |
 | High-trust primary-source investigation | `research` |
@@ -57,4 +57,4 @@ Use `/wayfinder` when the destination is clear enough to name but the route is t
 
 ## Boundary rule
 
-Do not route to a skill outside this repository's 17 entries. If a task needs several skills, name the full sequence and explain the transition point between them.
+Do not route to a skill outside this repository's 16 entries. If a task needs several skills, name the full sequence and explain the transition point between them.

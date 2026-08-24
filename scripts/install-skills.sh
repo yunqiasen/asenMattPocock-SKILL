@@ -18,10 +18,10 @@ usage() {
     '  --global          Install for the current user across projects.' \
     '  --agent <name>    Repeat for claude-code and/or codex.' \
     '  --skill <name>    Repeat to select one or more skills.' \
-    '  --all             Install all 17 skills.' \
+    '  --all             Install all 16 skills.' \
     '  --source <value>  Override the GitHub source or use a local checkout.' \
     '  --symlink         Use symlinks when supported instead of copies.' \
-    '  --list            List the 17 skills and their dependencies.' \
+    '  --list            List the 16 skills and their dependencies.' \
     '  --help            Show this help.'
 }
 

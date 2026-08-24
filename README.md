@@ -1,6 +1,6 @@
 # asenMattPocock Skills
 
-面向 AI Agent 的工程 Skill 集合。当前只维护 17 个 Skill，分为自动调用基础、手动调用入口和确认门工作流节点。
+面向 AI Agent 的工程 Skill 集合。当前只维护 16 个 Skill，分为自动调用基础、手动调用入口和确认门工作流节点。
 
 ## 安装
 
@@ -20,7 +20,7 @@ TARGET_PROJECT="/Users/yunqiroot/Desktop/项目/中"
 "$SKILLS_REPO/scripts/install-skills.sh" \
   --project "$TARGET_PROJECT" \
   --agent claude-code \
-  --skill grill-me
+  --skill grilling
 
 # Codex
 "$SKILLS_REPO/scripts/install-skills.sh" \
@@ -96,8 +96,7 @@ npx skills@latest add \
 安装器会自动补齐依赖。例如：
 
 ```text
-grill-me
-├── grilling
+grilling
 └── tdd
     ├── codebase-design
     │   └── prototype
@@ -118,7 +117,7 @@ implement
 
 ### 自动调用基础 Skill
 
-- [`grilling`](skills/productivity/grilling/SKILL.md)：底层通用拷问逻辑
+- [`grilling`](skills/productivity/grilling/SKILL.md)：通用拷问；直接用于小任务时，确认后进入执行阶段
 - [`domain-modeling`](skills/engineering/domain-modeling/SKILL.md)：维护项目领域词汇、`CONTEXT.md` 和 ADR
 - [`tdd`](skills/engineering/tdd/SKILL.md)：失败测试、最小实现、重构、提交；独立运行时调用一次 `code-review`
 - [`code-review`](skills/engineering/code-review/SKILL.md)：标准轴和规格轴双轴审查
@@ -129,7 +128,6 @@ implement
 
 ### 手动调用入口
 
-- [`grill-me`](skills/productivity/grill-me/SKILL.md)：不绑定代码库的通用拷问
 - [`grill-with-docs`](skills/engineering/grill-with-docs/SKILL.md)：绑定代码库并产出 `CONTEXT.md`、ADR
 - [`wayfinder`](skills/engineering/wayfinder/SKILL.md)：大任务探索地图和调查 Ticket
 - [`setup-matt-pocock-skills`](skills/engineering/setup-matt-pocock-skills/SKILL.md)：项目初始化和工作流配置
@@ -147,12 +145,14 @@ implement
 ### 1. 简单任务
 
 ```text
-grill-me -> grilling -> 用户确认
-  -> 小型明确代码改动：tdd -> code-review
-  -> 纯决策/文档/规划：输出结论后结束
+grilling
+  -> 用户确认
+  -> Agent 执行
+  -> 代码任务：tdd -> code-review
+  -> 非代码任务：输出结果后结束
 ```
 
-`grill-me` 不绑定代码库。需要维护 `CONTEXT.md` 或 ADR 时改用 `grill-with-docs`。独立运行的 `tdd` 只调用一次 `code-review`。
+这是最小工作流。`grilling` 直接处理简单需求；需要维护 `CONTEXT.md` 或 ADR 时改用 `grill-with-docs`。`grilling` 被其他 Skill 调用时，只负责拷问并把控制权返回给调用方，不自动进入 TDD。
 
 ### 2. 代码库内的标准开发
 
@@ -239,6 +239,7 @@ research
 
 - `SKILL.md` 中的 `Call the Skill tool with "name"` 才是运行时内部调用
 - `skills/manifest.json` 的 `dependsOn` 只用于安装时展开依赖闭包，不代表执行顺序
+- `grilling` 是通用拷问入口，直接启动时可在确认后进入最小执行流；被其他 Skill 调用时只返回对齐结果
 - `to-spec`、`to-tickets`、`implement` 是可手动启动、也可被上游 Skill 内部调用的确认门工作流节点
 - `tdd` 独立运行时调用一次 `code-review`；被 `implement` 调用时跳过内部审查
 - `diagnosing-bugs` 在用户确认后调用一次 `code-review`
@@ -261,7 +262,7 @@ asenMattPocock-SKILL/
 │   ├── list-skills.sh                      # 列出当前仓库所有 SKILL.md 路径
 │   └── resolve-skills.mjs                  # 展开 Skill 依赖闭包
 └── skills/
-    ├── manifest.json                       # 17 个 Skill 的唯一清单和依赖关系
+    ├── manifest.json                       # 16 个 Skill 的唯一清单和依赖关系
     ├── engineering/                        # 工程开发类 Skill
     │   ├── ask-matt/
     │   ├── code-review/
@@ -279,7 +280,6 @@ asenMattPocock-SKILL/
     │   ├── to-tickets/
     │   └── wayfinder/
     └── productivity/                        # 通用工作流 Skill
-        ├── grill-me/
         └── grilling/
 ```
 
