@@ -1,6 +1,6 @@
 {
   "repository": "yunqiasen/asenMattPocock-SKILL",
-  "developmentBranch": "MattPocock-Frok",
+  "developmentBranch": "MattPocock-Fork",
   "workflows": {
     "simple": { "entrySkills": ["grilling"], "prerequisites": [] },
     "standard": { "entrySkills": ["grill-with-docs"], "prerequisites": ["setup-matt-pocock-skills"] },

@@ -4,7 +4,7 @@ set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 MANIFEST="$REPO/skills/manifest.json"
 RESOLVER="$REPO/scripts/resolve-skills.mjs"
-DEFAULT_SOURCE="https://github.com/yunqiasen/asenMattPocock-SKILL/tree/MattPocock-Frok"
+DEFAULT_SOURCE="https://github.com/yunqiasen/asenMattPocock-SKILL/tree/MattPocock-Fork"
 
 usage() {
   printf '%s\n' \
