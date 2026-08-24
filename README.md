@@ -182,116 +182,14 @@ npx skills@latest add \
 
 ## 六条工作流
 
-### 1. 简单任务
-
-```text
-grilling
-  -> 用户确认
-  -> Agent 执行
-  -> 代码任务：tdd -> code-review
-  -> 非代码任务：输出结果后结束
-```
-
-- 适用：改文案、调样式、小功能、简单修复、普通文档或规划
-- `grilling` 顶层启动时，确认后进入执行
-- `grilling` 被其他 Skill 调用时，只返回对齐结果，不启动 TDD
-- 独立运行的 `tdd` 最后只调用一次 `code-review`
-
-### 2. 代码库内的标准开发
-
-```text
-grill-with-docs
-  -> 用户确认对齐结果
-  -> to-spec
-  -> 用户确认 spec
-  -> to-tickets
-  -> 用户确认当前 frontier ticket
-  -> implement
-  -> tdd
-  -> code-review
-```
-
-- 适用：需求明确，需要正式规格、任务拆分和完整实现
-- `to-spec` 和 `to-tickets` 都保留确认门
-- `implement` 调用 `tdd` 时，忽略 TDD 内部的审查交接
-- 全部切片、检查和测试通过后，由 `implement` 统一调用一次 `code-review`
-
-### 3. 模糊且规模很大的任务
-
-```text
-wayfinder
-  -> 确定 destination
-  -> 创建并解决 decision tickets
-  -> 按 Ticket 调用 research / prototype / grilling / domain-modeling
-  -> 地图无未决问题
-  -> 用户确认进入规格阶段
-  -> to-spec
-  -> 用户确认 spec
-  -> to-tickets
-  -> 用户确认当前 frontier ticket
-  -> implement -> tdd -> code-review
-```
-
-- 适用：目标模糊、未知项很多、需要先探索再决定的大任务
-- `wayfinder` 的 Ticket 是调查和决策 Ticket，不是业务实现 Ticket
-- `wayfinder` 只把地图走清楚，不能直接调用 `implement`
-
-### 4. 架构改进
-
-```text
-improve-codebase-architecture
-  -> 扫描代码库
-  -> 生成 architecture-review HTML 报告
-  -> 用户选择候选
-  -> grilling + domain-modeling
-  -> 形成重构决策方案
-  -> 用户确认进入规格阶段
-  -> to-spec
-  -> 用户确认 spec
-  -> to-tickets
-  -> 用户确认当前 frontier ticket
-  -> implement -> tdd -> code-review
-```
-
-- 适用：扫描代码坏味道、寻找 Deep Module 和重构机会
-- 该 Skill 负责报告、拷问和重构决策，不直接修改代码
-- 决策完成后必须经过 `to-spec -> to-tickets`，不能直接进入 `implement`
-
-### 5. Bug 调试
-
-```text
-diagnosing-bugs
-  -> 复现
-  -> 最小化
-  -> 生成并验证假设
-  -> 修复
-  -> 回归测试
-  -> 用户确认进入审查
-  -> code-review
-  -> 修复有效审查意见
-  -> 提交
-```
-
-- 适用：顽固 Bug、修 A 坏 B、根因不清楚的问题
-- 用户确认后只调用一次 `code-review`
-- 用户不确认审查时，流程停在提交前
-
-### 6. 研究后开发
-
-```text
-research
-  -> research/*.md（高可信一手资料和引用）
-  -> grill-with-docs
-  -> 用户确认对齐结果
-  -> to-spec
-  -> 用户确认 spec
-  -> to-tickets
-  -> 用户确认当前 frontier ticket
-  -> implement -> tdd -> code-review
-```
-
-- 适用：不熟悉的技术、库、SDK 或方案，需要先查清楚再开发
-- `research` 只负责调研产物，不绕过需求对齐和规格确认
+| # | 工作流 | 适用场景 | 完整流程 | 关键规则 |
+|---|---|---|---|---|
+| 1 | **简单任务** | 改文案、调样式、小功能、简单修复、普通文档或规划 | `grilling` → 用户确认 → Agent 执行 → 代码任务：`tdd` → `code-review`；非代码任务：输出结果后结束 | `grilling` 顶层运行时进入执行；被其他 Skill 调用时只返回对齐结果。独立 TDD 最终只审查一次 |
+| 2 | **标准开发** | 需求明确，需要正式规格、任务拆分和完整实现 | `grill-with-docs` → 确认对齐结果 → `to-spec` → 确认 spec → `to-tickets` → 确认当前 frontier ticket → `implement` → `tdd` → `code-review` | `to-spec`、`to-tickets` 都有确认门。`implement` 忽略 TDD 内部审查，由自己统一审查一次 |
+| 3 | **模糊大任务** | 目标模糊、未知项很多，需要先探索再决定 | `wayfinder` → 确定 destination → 解决 decision tickets → `research` / `prototype` / `grilling` / `domain-modeling` → 确认进入规格阶段 → `to-spec` → `to-tickets` → `implement` → `tdd` → `code-review` | Wayfinder Ticket 只负责调查和决策，不是业务实现 Ticket；不能直接调用 `implement` |
+| 4 | **架构改进** | 扫描代码坏味道、寻找 Deep Module 和系统性重构机会 | `improve-codebase-architecture` → HTML 报告 → 用户选择候选 → `grilling` + `domain-modeling` → 重构决策 → 确认进入规格阶段 → `to-spec` → `to-tickets` → `implement` → `tdd` → `code-review` | 架构 Skill 只负责扫描、报告和决策；必须经过 `to-spec → to-tickets` 才能实现 |
+| 5 | **Bug 调试** | 顽固 Bug、修 A 坏 B、根因不清楚 | `diagnosing-bugs` → 复现 → 最小化 → 验证假设 → 修复 → 回归测试 → 确认进入审查 → `code-review` → 修复有效意见 → 提交 | 用户确认后只调用一次 `code-review`；不确认则停在提交前 |
+| 6 | **研究后开发** | 技术、库、SDK 或方案不熟悉，需要先查清楚再开发 | `research` → `research/*.md` → `grill-with-docs` → 确认对齐结果 → `to-spec` → 确认 spec → `to-tickets` → 确认当前 frontier ticket → `implement` → `tdd` → `code-review` | `research` 只负责调研产物，不绕过需求对齐、规格确认和任务拆分 |
 
 ## 运行时调用规则
 
@@ -306,36 +204,33 @@ research
 
 ## Skill 清单
 
-### 自动调用基础 Skill
+调用方式说明：
 
-| Skill | 作用 |
+| 调用方式 | 含义 |
 |---|---|
-| [`grilling`](skills/productivity/grilling/SKILL.md) | 通用拷问；顶层简单任务确认后进入执行 |
-| [`domain-modeling`](skills/engineering/domain-modeling/SKILL.md) | 维护领域词汇、`CONTEXT.md` 和 ADR |
-| [`tdd`](skills/engineering/tdd/SKILL.md) | 失败测试、最小实现、重构、提交和独立审查交接 |
-| [`code-review`](skills/engineering/code-review/SKILL.md) | 标准轴和规格轴双轴审查 |
-| [`diagnosing-bugs`](skills/engineering/diagnosing-bugs/SKILL.md) | 系统化复现、最小化、假设、修复和回归测试 |
-| [`research`](skills/engineering/research/SKILL.md) | 查询高可信一手资料并生成带引用的 Markdown |
-| [`codebase-design`](skills/engineering/codebase-design/SKILL.md) | Deep Module、接口、Seam 和架构设计 |
-| [`prototype`](skills/engineering/prototype/SKILL.md) | 用原型回答逻辑或 UI 设计问题 |
+| **自动 + 手动** | Agent 可以根据任务自动调用，用户也可以明确指定该 Skill |
+| **仅手动** | 只有用户明确指定时才能启动，Skill 设置了 `disable-model-invocation: true` |
 
-### 手动调用入口
+本项目没有“只能自动、不能手动”的 Skill。
 
-| Skill | 作用 |
-|---|---|
-| [`grill-with-docs`](skills/engineering/grill-with-docs/SKILL.md) | 绑定代码库进行工程拷问，产出或维护 `CONTEXT.md`、ADR |
-| [`wayfinder`](skills/engineering/wayfinder/SKILL.md) | 为模糊大任务建立探索地图和调查 Ticket |
-| [`setup-matt-pocock-skills`](skills/engineering/setup-matt-pocock-skills/SKILL.md) | 初始化 issue tracker、标签和文档目录 |
-| [`ask-matt`](skills/engineering/ask-matt/SKILL.md) | 不知道该用哪个 Skill 时负责路由 |
-| [`improve-codebase-architecture`](skills/engineering/improve-codebase-architecture/SKILL.md) | 扫描架构改进机会并生成 HTML 报告 |
-
-### 确认门工作流节点
-
-| Skill | 作用 |
-|---|---|
-| [`to-spec`](skills/engineering/to-spec/SKILL.md) | 把已对齐内容写成正式规格，确认后调用 `to-tickets` |
-| [`to-tickets`](skills/engineering/to-tickets/SKILL.md) | 把规格拆成 Tracer Bullet 垂直切片，确认后调用 `implement` |
-| [`implement`](skills/engineering/implement/SKILL.md) | 实现一个已批准的规格或 Ticket，内部运行 TDD 和一次最终审查 |
+| Skill | 调用方式 | 定位 | 作用 |
+|---|---|---|---|
+| [`grilling`](skills/productivity/grilling/SKILL.md) | **自动 + 手动** | 最小工作流入口 | 通用拷问和需求对齐；顶层简单任务确认后进入执行，被其他 Skill 调用时只返回对齐结果 |
+| [`grill-with-docs`](skills/engineering/grill-with-docs/SKILL.md) | **仅手动** | 标准开发入口 | 绑定代码库进行工程拷问，调用 `grilling`、`domain-modeling`，维护 `CONTEXT.md` 和 ADR |
+| [`domain-modeling`](skills/engineering/domain-modeling/SKILL.md) | **自动 + 手动** | 基础能力 | 维护领域词汇、`CONTEXT.md` 和架构决策记录 |
+| [`wayfinder`](skills/engineering/wayfinder/SKILL.md) | **仅手动** | 模糊大任务入口 | 建立探索地图，通过调查和决策 Ticket 逐步消除未知项 |
+| [`setup-matt-pocock-skills`](skills/engineering/setup-matt-pocock-skills/SKILL.md) | **仅手动** | 项目初始化 | 配置 issue tracker、标签、领域文档和工作流目录 |
+| [`tdd`](skills/engineering/tdd/SKILL.md) | **自动 + 手动** | 实现基础能力 | 执行失败测试 → 最小实现 → 重构 → 提交；独立运行时最终调用一次 `code-review` |
+| [`code-review`](skills/engineering/code-review/SKILL.md) | **自动 + 手动** | 审查基础能力 | 沿代码标准轴和规格符合度轴并行执行双轴审查 |
+| [`ask-matt`](skills/engineering/ask-matt/SKILL.md) | **仅手动** | Skill 路由入口 | 用户不知道使用哪个 Skill 时，根据任务选择正确入口或工作流 |
+| [`to-spec`](skills/engineering/to-spec/SKILL.md) | **自动 + 手动** | 确认门节点 | 把已对齐内容写成正式规格，用户确认后调用 `to-tickets` |
+| [`to-tickets`](skills/engineering/to-tickets/SKILL.md) | **自动 + 手动** | 确认门节点 | 把规格拆成 Tracer Bullet 垂直切片，用户确认后调用 `implement` |
+| [`implement`](skills/engineering/implement/SKILL.md) | **自动 + 手动** | 实现节点 | 实现一个已批准的规格或 Ticket，内部运行 TDD，最终统一审查一次 |
+| [`diagnosing-bugs`](skills/engineering/diagnosing-bugs/SKILL.md) | **自动 + 手动** | Bug 工作流入口 | 系统化执行复现、最小化、假设验证、修复和回归测试，确认后进入审查 |
+| [`research`](skills/engineering/research/SKILL.md) | **自动 + 手动** | 调研基础能力 | 查询高可信一手资料并生成带引用的 `research/*.md` |
+| [`improve-codebase-architecture`](skills/engineering/improve-codebase-architecture/SKILL.md) | **仅手动** | 架构改进入口 | 扫描 Deep Module 和重构机会，生成 HTML 报告，并通过拷问形成重构决策 |
+| [`codebase-design`](skills/engineering/codebase-design/SKILL.md) | **自动 + 手动** | 设计基础能力 | 分析 Deep Module、接口、Seam、测试边界和 UI 架构 |
+| [`prototype`](skills/engineering/prototype/SKILL.md) | **自动 + 手动** | 原型基础能力 | 用一次性逻辑原型或 UI 原型快速回答设计问题 |
 
 ## 上游维护
 
