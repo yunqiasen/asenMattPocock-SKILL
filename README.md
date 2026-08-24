@@ -42,10 +42,17 @@ MattPocock-Fork 二开分支，日常开发分支，也是安装源
 ASEN="npx -y github:yunqiasen/asenMattPocock-SKILL#MattPocock-Fork"
 ```
 
-npx 会把该分支缓存在本机 npm 缓存里。需要强制拉最新分支内容时加 `--ignore-existing`：
+npx 会把该分支缓存在本机 npm 缓存里。分支更新后想强制拉最新内容，清 npx 缓存再跑（新版 npm 已移除 `--ignore-existing`）：
 
 ```bash
-npx -y --ignore-existing github:yunqiasen/asenMattPocock-SKILL#MattPocock-Fork install --list-workflows
+npm cache clean --force
+$ASEN install --list-workflows
+```
+
+也可以钉死到某个 commit，避免缓存歧义：
+
+```bash
+npx -y "github:yunqiasen/asenMattPocock-SKILL#<commit-sha>" install --list-workflows
 ```
 
 安装 Skill 时必须同时确定三件事：
