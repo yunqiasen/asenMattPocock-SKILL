@@ -32,6 +32,10 @@ _Avoid_: 系统安装
 一个 Skill 正常工作前必须同时安装的其他 Skill。依赖关系统一记录在 `skills/manifest.json`。
 _Avoid_: 隐式复制
 
+**工作流安装闭包**:
+由 `skills/manifest.json` 中工作流的一次性前置 Skill、入口 Skill 和递归依赖组成的完整安装集合。默认保证新项目不漏装；项目已初始化时可以跳过前置 Skill，只保留日常运行闭包。
+_Avoid_: 运行顺序
+
 **目标项目**:
 真正使用 Skill 的项目目录，不是本 Skill 仓库目录。
 _Avoid_: 安装源

@@ -10,18 +10,24 @@ usage() {
   printf '%s\n' \
     'Usage:' \
     '  scripts/install-skills.sh --project <path> --agent <claude-code|codex> --skill <name> [...]' \
+    '  scripts/install-skills.sh --project <path> --agent <claude-code|codex> --workflow <name> [...]' \
     '  scripts/install-skills.sh --global --agent <claude-code|codex> --skill <name> [...]' \
+    '  scripts/install-skills.sh --global --agent <claude-code|codex> --workflow <name> [...]' \
     '  scripts/install-skills.sh --list' \
+    '  scripts/install-skills.sh --list-workflows' \
     '' \
     'Options:' \
     '  --project <path>  Install into one project directory.' \
     '  --global          Install for the current user across projects.' \
     '  --agent <name>    Repeat for claude-code and/or codex.' \
     '  --skill <name>    Repeat to select one or more skills.' \
+    '  --workflow <name>  Repeat to install a named workflow and its full dependency closure.' \
+    '  --skip-prerequisites  Omit one-time setup skills for an already initialized project.' \
     '  --all             Install all 16 skills.' \
     '  --source <value>  Override the GitHub source or use a local checkout.' \
     '  --symlink         Use symlinks when supported instead of copies.' \
     '  --list            List the 16 skills and their dependencies.' \
+    '  --list-workflows  List workflow entries, prerequisites, counts and install closures.' \
     '  --help            Show this help.'
 }
 
@@ -31,8 +37,12 @@ source="$DEFAULT_SOURCE"
 copy=true
 list=false
 all=false
+list_workflows=false
+skip_prerequisites=false
 agents=()
 requested=()
+workflows=()
+prerequisites=()
 
 while (($# > 0)); do
   case "$1" in
@@ -58,6 +68,15 @@ while (($# > 0)); do
       requested+=("$2")
       shift 2
       ;;
+    --workflow)
+      [[ $# -ge 2 ]] || { echo "--workflow requires a name" >&2; exit 2; }
+      workflows+=("$2")
+      shift 2
+      ;;
+    --skip-prerequisites)
+      skip_prerequisites=true
+      shift
+      ;;
     --all)
       all=true
       shift
@@ -73,6 +92,10 @@ while (($# > 0)); do
       ;;
     --list)
       list=true
+      shift
+      ;;
+    --list-workflows)
+      list_workflows=true
       shift
       ;;
     --help|-h)
@@ -93,6 +116,12 @@ if "$list"; then
   exit 0
 fi
 
+if "$list_workflows"; then
+  printf 'NAME\tENTRY_SKILLS\tPREREQUISITES\tCOUNT\tINSTALLS\n'
+  node "$RESOLVER" "$MANIFEST" list-workflows
+  exit 0
+fi
+
 if "$global_install" && [[ -n "$project" ]]; then
   echo "Use either --project or --global, not both." >&2
   exit 2
@@ -109,6 +138,34 @@ if "$all" && ((${#requested[@]} > 0)); then
   echo "Use either --all or --skill, not both." >&2
   exit 2
 fi
+if "$all" && ((${#workflows[@]} > 0)); then
+  echo "Use either --all or --workflow, not both." >&2
+  exit 2
+fi
+if ((${#requested[@]} > 0)) && ((${#workflows[@]} > 0)); then
+  echo "Use either --skill or --workflow, not both." >&2
+  exit 2
+fi
+if "$skip_prerequisites" && ((${#workflows[@]} == 0)); then
+  echo "--skip-prerequisites requires --workflow." >&2
+  exit 2
+fi
+
+if ((${#workflows[@]} > 0)); then
+  workflow_mode="workflow-all"
+  if "$skip_prerequisites"; then workflow_mode="workflow"; fi
+  workflow_roots="$(node "$RESOLVER" "$MANIFEST" "$workflow_mode" "${workflows[@]}")"
+  while IFS= read -r name; do
+    requested+=("$name")
+  done <<< "$workflow_roots"
+
+  workflow_prerequisites="$(node "$RESOLVER" "$MANIFEST" workflow-prerequisites "${workflows[@]}")"
+  if [[ -n "$workflow_prerequisites" ]]; then
+    while IFS= read -r name; do
+      prerequisites+=("$name")
+    done <<< "$workflow_prerequisites"
+  fi
+fi
 
 if "$all"; then
   while IFS= read -r name; do
@@ -121,7 +178,7 @@ NODE
   )
 fi
 if ((${#requested[@]} == 0)); then
-  echo "At least one --skill or --all is required." >&2
+  echo "At least one --skill, --workflow or --all is required." >&2
   exit 2
 fi
 
@@ -139,6 +196,16 @@ command+=(--yes)
 
 printf 'Installing: %s\n' "${resolved[*]}"
 printf 'Agents: %s\n' "${agents[*]}"
+if ((${#workflows[@]} > 0)); then
+  printf 'Workflows: %s\n' "${workflows[*]}"
+fi
+if ((${#prerequisites[@]} > 0)); then
+  if "$skip_prerequisites"; then
+    printf 'Prerequisites skipped (project must already be initialized): %s\n' "${prerequisites[*]}"
+  else
+    printf 'Prerequisites included (run once for a new project): %s\n' "${prerequisites[*]}"
+  fi
+fi
 if "$global_install"; then
   printf 'Scope: global\n'
   "${command[@]}"

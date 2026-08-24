@@ -56,13 +56,13 @@ TARGET_PROJECT="/Users/yunqiroot/Desktop/项目/中"
 "$SKILLS_REPO/scripts/install-skills.sh" \
   --project "$TARGET_PROJECT" \
   --agent claude-code \
-  --skill grilling
+  --workflow simple
 
 # Codex 项目级
 "$SKILLS_REPO/scripts/install-skills.sh" \
   --project "$TARGET_PROJECT" \
   --agent codex \
-  --skill grilling
+  --workflow simple
 ```
 
 安装位置：
@@ -80,7 +80,7 @@ Claude Code 和 Codex 都需要时，可以在一条命令中同时安装：
   --project "$TARGET_PROJECT" \
   --agent claude-code \
   --agent codex \
-  --skill grill-with-docs
+  --workflow standard
 ```
 
 ### 3. 全局安装
@@ -94,13 +94,13 @@ SKILLS_REPO="/Users/yunqiroot/Documents/ChatGPT/Agent-项目/asenMattPocock-SKIL
 "$SKILLS_REPO/scripts/install-skills.sh" \
   --global \
   --agent claude-code \
-  --skill grilling
+  --workflow simple
 
 # Codex 全局
 "$SKILLS_REPO/scripts/install-skills.sh" \
   --global \
   --agent codex \
-  --skill grilling
+  --workflow simple
 ```
 
 安装位置：
@@ -112,17 +112,40 @@ Codex：      ~/.agents/skills/<skill-name>/
 
 ### 4. 按工作流安装
 
-安装器会根据 [`skills/manifest.json`](skills/manifest.json) 自动补齐安装依赖。`dependsOn` 只表示需要同时安装，不表示运行时自动调用顺序。
+推荐按工作流安装，不要直接安装全部 16 个 Skill。安装器会根据 [`skills/manifest.json`](skills/manifest.json) 自动补齐该工作流的完整安装闭包，避免漏装内部调用的 Skill，同时减少客户端需要扫描的 Skill 数量。
 
-| 使用场景 | 安装参数 |
+客户端通常会常驻已安装 Skill 的名称和描述，完整 `SKILL.md` 在触发后再加载。因此按工作流安装主要减少常驻元数据、Skill 选择噪音和后续正文加载范围。单独使用某个 Skill 时仍可使用 `--skill <name>`；需要完整链路时优先使用 `--workflow <name>`。
+
+| 使用场景 | 安装命令核心参数 | 默认数量 | 完整安装闭包 |
+|---|---|---:|---|
+| 简单任务 | `--workflow simple` | 5 | `grilling`、`tdd`、`codebase-design`、`prototype`、`code-review` |
+| 标准开发 | `--workflow standard` | 11 | `setup-matt-pocock-skills`（一次性前置）、`grill-with-docs`、`grilling`、`domain-modeling`、`to-spec`、`to-tickets`、`implement`、`tdd`、`codebase-design`、`prototype`、`code-review` |
+| 模糊大任务 | `--workflow wayfinder` | 12 | `setup-matt-pocock-skills`（一次性前置）、`wayfinder`、`grilling`、`domain-modeling`、`research`、`prototype`、`to-spec`、`to-tickets`、`implement`、`tdd`、`codebase-design`、`code-review` |
+| 架构改进 | `--workflow architecture` | 11 | `setup-matt-pocock-skills`（一次性前置）、`improve-codebase-architecture`、`codebase-design`、`prototype`、`grilling`、`domain-modeling`、`to-spec`、`to-tickets`、`implement`、`tdd`、`code-review` |
+| Bug 调试 | `--workflow bug` | 2 | `diagnosing-bugs`、`code-review` |
+| 研究后开发 | `--workflow research` | 12 | `setup-matt-pocock-skills`（一次性前置）、`research`、`grill-with-docs`、`grilling`、`domain-modeling`、`to-spec`、`to-tickets`、`implement`、`tdd`、`codebase-design`、`prototype`、`code-review` |
+| 安装全部 16 个 Skill | `--all` | 16 | 仅在确实需要多个工作流时使用 |
+
+新项目使用默认命令，保证一次性初始化 Skill 不会漏装。目标项目已经运行过 `setup-matt-pocock-skills` 时，可以省掉它：
+
+```bash
+"$SKILLS_REPO/scripts/install-skills.sh" \
+  --project "$TARGET_PROJECT" \
+  --agent codex \
+  --workflow standard \
+  --skip-prerequisites
+```
+
+`--workflow` 的名称和入口定义在 `manifest.json`：
+
+| 工作流参数 | 入口 Skill |
 |---|---|
-| 简单任务 | `--skill grilling` |
-| 标准开发 | `--skill grill-with-docs` |
-| 模糊大任务 | `--skill wayfinder` |
-| 架构改进 | `--skill improve-codebase-architecture` |
-| Bug 调试 | `--skill diagnosing-bugs` |
-| 研究后开发 | `--skill research --skill grill-with-docs` |
-| 安装全部 16 个 Skill | `--all` |
+| `simple` | `grilling` |
+| `standard` | `grill-with-docs` |
+| `wayfinder` | `wayfinder` |
+| `architecture` | `improve-codebase-architecture` |
+| `bug` | `diagnosing-bugs` |
+| `research` | `research`、`grill-with-docs` |
 
 示例：给 Codex 项目安装“研究后开发”工作流。
 
@@ -130,11 +153,18 @@ Codex：      ~/.agents/skills/<skill-name>/
 "$SKILLS_REPO/scripts/install-skills.sh" \
   --project "$TARGET_PROJECT" \
   --agent codex \
-  --skill research \
-  --skill grill-with-docs
+  --workflow research
 ```
 
-项目初始化由 `setup-matt-pocock-skills` 单独执行，不算一条开发工作流：
+查看可用工作流：
+
+```bash
+"$SKILLS_REPO/scripts/install-skills.sh" --list-workflows
+```
+
+该命令会显示每条工作流的入口 Skill、一次性前置 Skill、安装数量和完整闭包。正式安装时，安装器也会先打印 `Installing: ...`，便于确认没有多装或漏装。
+
+项目初始化由 `setup-matt-pocock-skills` 单独执行，不算一条开发工作流。标准开发、模糊大任务、架构改进和研究后开发的默认 `--workflow` 安装会包含它，但新项目仍需手动运行一次：
 
 ```bash
 "$SKILLS_REPO/scripts/install-skills.sh" \
@@ -178,23 +208,28 @@ npx skills@latest add \
   --yes
 ```
 
-直接使用 `npx` 时，需要自行把工作流涉及的 Skill 全部选上；仓库安装器会自动展开依赖，因此更推荐使用安装器。
+直接使用 `npx` 时没有本仓库的 `--workflow` 解析能力，需要按照上面的“安装闭包”手动填写全部 `--skill`；仓库安装器会自动展开依赖，因此更推荐使用安装器。
 
 ## 六条工作流
 
-| # | 工作流 | 适用场景 | 完整流程 | 关键规则 |
+流程中的括号表示“这个 Skill 内部调用了谁”；箭头表示运行顺序；“确认门”表示必须等待用户明确确认，不能自动跳过。
+
+| # | 工作流 | 适用场景 | 详细运行流程（括号为内部调用） | 最终结果 |
 |---|---|---|---|---|
-| 1 | **简单任务** | 改文案、调样式、小功能、简单修复、普通文档或规划 | `grilling` → 用户确认 → Agent 执行 → 代码任务：`tdd` → `code-review`；非代码任务：输出结果后结束 | `grilling` 顶层运行时进入执行；被其他 Skill 调用时只返回对齐结果。独立 TDD 最终只审查一次 |
-| 2 | **标准开发** | 需求明确，需要正式规格、任务拆分和完整实现 | `grill-with-docs` → 确认对齐结果 → `to-spec` → 确认 spec → `to-tickets` → 确认当前 frontier ticket → `implement` → `tdd` → `code-review` | `to-spec`、`to-tickets` 都有确认门。`implement` 忽略 TDD 内部审查，由自己统一审查一次 |
-| 3 | **模糊大任务** | 目标模糊、未知项很多，需要先探索再决定 | `wayfinder` → 确定 destination → 解决 decision tickets → `research` / `prototype` / `grilling` / `domain-modeling` → 确认进入规格阶段 → `to-spec` → `to-tickets` → `implement` → `tdd` → `code-review` | Wayfinder Ticket 只负责调查和决策，不是业务实现 Ticket；不能直接调用 `implement` |
-| 4 | **架构改进** | 扫描代码坏味道、寻找 Deep Module 和系统性重构机会 | `improve-codebase-architecture` → HTML 报告 → 用户选择候选 → `grilling` + `domain-modeling` → 重构决策 → 确认进入规格阶段 → `to-spec` → `to-tickets` → `implement` → `tdd` → `code-review` | 架构 Skill 只负责扫描、报告和决策；必须经过 `to-spec → to-tickets` 才能实现 |
-| 5 | **Bug 调试** | 顽固 Bug、修 A 坏 B、根因不清楚 | `diagnosing-bugs` → 复现 → 最小化 → 验证假设 → 修复 → 回归测试 → 确认进入审查 → `code-review` → 修复有效意见 → 提交 | 用户确认后只调用一次 `code-review`；不确认则停在提交前 |
-| 6 | **研究后开发** | 技术、库、SDK 或方案不熟悉，需要先查清楚再开发 | `research` → `research/*.md` → `grill-with-docs` → 确认对齐结果 → `to-spec` → 确认 spec → `to-tickets` → 确认当前 frontier ticket → `implement` → `tdd` → `code-review` | `research` 只负责调研产物，不绕过需求对齐、规格确认和任务拆分 |
+| 1 | **简单任务** | 改文案、调样式、小功能、简单修复、普通文档或规划 | ① `grilling`<br>② 【确认门】用户确认需求<br>③ Agent 执行<br>④ 代码任务：`tdd`（`grilling` 顶层内部调用）<br>⑤ `code-review`（`tdd` 内部调用）<br>非代码任务：第③步输出结果后结束 | 代码变更完成并审查；非代码任务直接交付 |
+| 2 | **标准开发** | 需求明确，需要正式规格、任务拆分和完整实现 | 前置：新项目先手动运行一次 `setup-matt-pocock-skills`<br>① `grill-with-docs`（内部调用：`grilling` + `domain-modeling`）<br>② 【确认门】确认对齐结果<br>③ `to-spec`（`grill-with-docs` 内部调用）<br>④ 【确认门】确认 spec<br>⑤ `to-tickets`（`to-spec` 内部调用）<br>⑥ 【确认门】确认 frontier Ticket<br>⑦ `implement`（`to-tickets` 内部调用）<br>⑧ `tdd`（`implement` 内部调用，跳过 TDD 自己的审查步骤）<br>⑨ `code-review`（`implement` 内部调用） | 一个已批准 Ticket 完成 TDD、检查和一次最终审查 |
+| 3 | **模糊大任务** | 目标模糊、未知项很多，需要先探索再决定 | 前置：新项目先手动运行一次 `setup-matt-pocock-skills`<br>① `wayfinder`（内部调用：`grilling` + `domain-modeling`）<br>② 创建并解决 decision Tickets（按 Ticket 内部调用：`research` / `prototype` / `grilling` / `domain-modeling`）<br>③ 【确认门】地图完成，确认交接<br>④ `to-spec`（`wayfinder` 内部调用）<br>⑤ 【确认门】确认 spec<br>⑥ `to-tickets`（`to-spec` 内部调用）<br>⑦ 【确认门】确认 frontier Ticket<br>⑧ `implement`（`to-tickets` 内部调用）<br>⑨ `tdd`（`implement` 内部调用）<br>⑩ `code-review`（`implement` 内部调用） | 先完成调查和决策，再进入正式开发；Wayfinder 不实现业务 Ticket |
+| 4 | **架构改进** | 扫描代码坏味道、寻找 Deep Module 和系统性重构机会 | 前置：新项目先手动运行一次 `setup-matt-pocock-skills`<br>① `improve-codebase-architecture`（内部调用：`codebase-design`）<br>② 扫描代码库并生成 HTML 报告<br>③ 用户选择候选<br>④ `grilling` + `domain-modeling`（架构 Skill 内部调用）<br>⑤ 【确认门】确认重构决策<br>⑥ `to-spec`（架构 Skill 内部调用）<br>⑦ 【确认门】确认 spec<br>⑧ `to-tickets`（`to-spec` 内部调用）<br>⑨ 【确认门】确认 frontier Ticket<br>⑩ `implement`（`to-tickets` 内部调用）<br>⑪ `tdd`（`implement` 内部调用）<br>⑫ `code-review`（`implement` 内部调用） | 重构决策经过规格和 Ticket 确认后实施；不能从架构报告直接进入 `implement` |
+| 5 | **Bug 调试** | 顽固 Bug、修 A 坏 B、根因不清楚 | ① `diagnosing-bugs`<br>② 复现 → 最小化 → 验证假设 → 修复 → 回归测试<br>③ 【确认门】用户确认进入审查<br>④ `code-review`（`diagnosing-bugs` 内部调用）<br>⑤ 修复有效审查意见<br>⑥ 提交 | 修复完成、回归测试通过、审查一次后提交 |
+| 6 | **研究后开发** | 技术、库、SDK 或方案不熟悉，需要先查清楚再开发 | 前置：新项目先手动运行一次 `setup-matt-pocock-skills`<br>① `research` → 生成 `research/*.md`<br>② **停止并提示用户手动启动** `grill-with-docs`（不是 `research` 内部调用）<br>③ `grill-with-docs`（内部调用：`grilling` + `domain-modeling`）<br>④ 【确认门】确认对齐结果<br>⑤ `to-spec`（`grill-with-docs` 内部调用）<br>⑥ 【确认门】确认 spec<br>⑦ `to-tickets`（`to-spec` 内部调用）<br>⑧ 【确认门】确认 frontier Ticket<br>⑨ `implement`（`to-tickets` 内部调用）<br>⑩ `tdd`（`implement` 内部调用）<br>⑪ `code-review`（`implement` 内部调用） | 调研结果进入标准开发链；不让研究 Skill 越过人工规划门 |
+
+包含 `tdd` 的工作流还会安装 `codebase-design` 和 `prototype`：测试 Seam 或接口形状不明确时，`tdd` 会按需调用 `codebase-design`；需要用原型判断设计时，`codebase-design` 会按需调用 `prototype`。它们不一定每次运行，但缺少时会让条件分支中断。
 
 ## 运行时调用规则
 
 - `SKILL.md` 中明确写出的 `Call the Skill tool with "name"` 才是运行时内部调用
 - [`skills/manifest.json`](skills/manifest.json) 的 `dependsOn` 只用于安装依赖展开，不是工作流执行顺序
+- `workflows.<name>.prerequisites` 是新项目一次性前置 Skill，默认随工作流安装，但不会被工作流自动运行
 - `grilling`：顶层小任务可进入执行；嵌套调用只返回对齐结果
 - `to-spec -> to-tickets -> implement`：按顺序衔接，每一步都遵守自己的确认门
 - `tdd`：独立运行时调用一次 `code-review`；被 `implement` 调用时跳过内部审查
@@ -337,7 +372,7 @@ asenMattPocock-SKILL/
 │   ├── list-skills.sh                     # 列出仓库内所有 SKILL.md
 │   └── resolve-skills.mjs                 # 根据 manifest 展开安装依赖
 └── skills/
-    ├── manifest.json                      # 16 个 Skill 的唯一清单和安装依赖
+    ├── manifest.json                      # 16 个 Skill、6 个工作流入口和安装依赖
     ├── engineering/                       # 工程开发类 Skill
     │   ├── ask-matt/                      # Skill 路由
     │   ├── code-review/                   # 双轴代码审查
