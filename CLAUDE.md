@@ -5,8 +5,8 @@
 ## 分支约束
 
 - `main` 只作为 `mattpocock/skills` 的上游镜像分支，只允许快进同步 `upstream/main`。
-- `develop` 是二开开发分支和唯一安装源，所有删减、调用编排和 Skill 微调都在这里完成。
-- 不得在 `main` 开发，不得在 `develop` 执行 `git pull upstream main` 或 `git merge main`。
+- `MattPocock-Frok` 是二开开发分支和唯一安装源，所有删减、调用编排和 Skill 微调都在这里完成。
+- 不得在 `main` 开发，不得在 `MattPocock-Frok` 执行 `git pull upstream main` 或 `git merge main`。
 - 上游更新后，只检查本项目保留的 16 个 Skill；逐个判断并选择性移植，不整体合并上游。
 - 上游新增、删除或移动 Skill 时，不自动修改本项目清单。
 - 每轮上游审查完成并通过验证后，更新 README 的上游审查基线；该基线表示已检查，不表示全部移植。

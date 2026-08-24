@@ -9,23 +9,23 @@ upstream/main (mattpocock/skills)
         ↓ 只做快进同步
 main    上游镜像分支，不做二开
         ↓ 逐个检查保留的 16 个 Skill，选择性移植
-develop 二开分支，日常开发分支，也是安装源
+MattPocock-Frok 二开分支，日常开发分支，也是安装源
 ```
 
 - `main`：只跟踪和更新上游，不写二开代码
-- `develop`：保存本项目删减、工作流编排和 Skill 微调
-- 禁止把整个 `main` 直接合并进 `develop`
+- `MattPocock-Frok`：保存本项目删减、工作流编排和 Skill 微调
+- 禁止把整个 `main` 直接合并进 `MattPocock-Frok`
 - 上游更新后，只检查本项目保留的 16 个 Skill；逐个决定是否移植
 - 上游新增或删除 Skill，不自动改变本项目的 16 个 Skill 清单
 
-当前上游审查基线：`5b15a47`，审查日期：`2026-08-24`。该基线表示上游内容已检查到此提交，不表示所有上游实现都已复制到 `develop`。
+当前上游审查基线：`5b15a47`，审查日期：`2026-08-24`。该基线表示上游内容已检查到此提交，不表示所有上游实现都已复制到 `MattPocock-Frok`。
 
 ## 安装
 
-二开内容在 `develop`，安装时必须使用该分支：
+二开内容在 `MattPocock-Frok`，安装时必须使用该分支：
 
 ```text
-https://github.com/yunqiasen/asenMattPocock-SKILL/tree/develop
+https://github.com/yunqiasen/asenMattPocock-SKILL/tree/MattPocock-Frok
 ```
 
 ### 1. 获取开发仓库
@@ -34,7 +34,7 @@ https://github.com/yunqiasen/asenMattPocock-SKILL/tree/develop
 cd "/Users/yunqiroot/Documents/ChatGPT/Agent-项目"
 git clone git@github.com:yunqiasen/asenMattPocock-SKILL.git
 cd asenMattPocock-SKILL
-git switch develop
+git switch MattPocock-Frok
 git remote add upstream git@github.com:mattpocock/skills.git
 ```
 
@@ -181,7 +181,7 @@ Codex：      ~/.agents/skills/<skill-name>/
 cd "/Users/yunqiroot/Desktop/项目/中"
 
 npx skills@latest add \
-  "https://github.com/yunqiasen/asenMattPocock-SKILL/tree/develop" \
+  "https://github.com/yunqiasen/asenMattPocock-SKILL/tree/MattPocock-Frok" \
   --agent codex \
   --skill grilling \
   --skill tdd \
@@ -196,7 +196,7 @@ npx skills@latest add \
 
 ```bash
 npx skills@latest add \
-  "https://github.com/yunqiasen/asenMattPocock-SKILL/tree/develop" \
+  "https://github.com/yunqiasen/asenMattPocock-SKILL/tree/MattPocock-Frok" \
   --agent claude-code \
   --skill grilling \
   --skill tdd \
@@ -274,7 +274,7 @@ npx skills@latest add \
 | 分支 | 唯一职责 | 禁止事项 |
 |---|---|---|
 | `main` | 快进同步 `mattpocock/skills` 的 `upstream/main` | 不做二开、不删 Skill、不改工作流 |
-| `develop` | 保存本项目的 16 个 Skill 和二开逻辑 | 不直接拉取或整体合并 `main` |
+| `MattPocock-Frok` | 保存本项目的 16 个 Skill 和二开逻辑 | 不直接拉取或整体合并 `main` |
 
 ### 1. 只更新 main
 
@@ -283,10 +283,10 @@ git fetch upstream --prune
 git switch main
 git merge --ff-only upstream/main
 git push origin main
-git switch develop
+git switch MattPocock-Frok
 ```
 
-这一步只更新上游镜像，不修改 `develop`。
+这一步只更新上游镜像，不修改 `MattPocock-Frok`。
 
 ### 2. 检查上游保留 Skill 的变化
 
@@ -321,12 +321,12 @@ git diff --name-status "$BASELINE"..main -- \
 4. 是否需要同步附属文档、脚本和 `agents/openai.yaml`
 5. 是否需要更新 `skills/manifest.json` 的安装依赖
 
-### 3. 选择性移植到 develop
+### 3. 选择性移植到 MattPocock-Frok
 
 ```text
-上游没有相关变化 -> 不改 develop
+上游没有相关变化 -> 不改 MattPocock-Frok
 上游改动有价值且不冲突 -> 只移植该 Skill 的目标改动
-上游改动与二开流程冲突 -> 保留 develop，记录拒绝原因
+上游改动与二开流程冲突 -> 保留 MattPocock-Frok，记录拒绝原因
 上游新增 Skill -> 默认不引入
 上游删除 Skill -> 不自动跟随，单独评估
 ```
@@ -334,7 +334,7 @@ git diff --name-status "$BASELINE"..main -- \
 禁止以下操作：
 
 ```bash
-git switch develop
+git switch MattPocock-Frok
 git pull upstream main
 git merge main
 ```
@@ -355,7 +355,7 @@ git diff --check
 - `skills/manifest.json` 和实际目录一致
 - Claude Code、Codex 的项目级和全局安装仍然可用
 - 六条工作流的确认门和内部调用没有被上游覆盖
-- 验证通过后再更新 README 中的上游审查基线并提交 `develop`
+- 验证通过后再更新 README 中的上游审查基线并提交 `MattPocock-Frok`
 
 ## 最终目录
 
