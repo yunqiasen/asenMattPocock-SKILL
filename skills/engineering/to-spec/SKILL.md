@@ -5,7 +5,7 @@ description: "Turn an agreed conversation into a formal spec, publish it to the 
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know.
 
-The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/setup-matt-pocock-skills`.
+Read the issue tracker configuration from `docs/agents/issue-tracker.md`. If it is missing, tell the user to run the project initializer (`asen-skills init --project <path>`), then default to the local-markdown tracker for this session.
 
 ## Process
 

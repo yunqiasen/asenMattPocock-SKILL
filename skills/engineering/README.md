@@ -12,7 +12,6 @@
 | [improve-codebase-architecture](improve-codebase-architecture/SKILL.md) | 仅手动 | 扫描架构优化机会并生成 HTML 报告和重构决策 |
 | [prototype](prototype/SKILL.md) | 自动 + 手动 | 用可运行原型回答逻辑或 UI 设计问题 |
 | [research](research/SKILL.md) | 自动 + 手动 | 基于高可信一手资料调研并生成引用文档 |
-| [setup-matt-pocock-skills](setup-matt-pocock-skills/SKILL.md) | 仅手动 | 初始化项目工作流配置 |
 | [tdd](tdd/SKILL.md) | 自动 + 手动 | 失败测试、最小实现、重构和提交 |
 | [to-spec](to-spec/SKILL.md) | 自动 + 手动 | 对齐结果转正式规格，确认后调用 `to-tickets` |
 | [to-tickets](to-tickets/SKILL.md) | 自动 + 手动 | 规格转 Tracer Bullet Ticket，确认后调用 `implement` |

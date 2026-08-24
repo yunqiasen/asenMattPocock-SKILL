@@ -10,7 +10,7 @@ Use this router when the user does not know which skill fits the task.
 
 ## Main delivery flow
 
-1. Run `/setup-matt-pocock-skills` once for a new codebase.
+1. For a new codebase, the project must already be initialized. If `docs/agents/issue-tracker.md` is missing, tell the user to run `asen-skills init --project <path>` once. This is a shell command, not a skill.
 2. Use `/grill-with-docs` for repository-bound planning. It invokes `grilling` and `domain-modeling` and records `CONTEXT.md` and ADR decisions.
 3. Use `to-spec` when the conversation is settled and needs a formal specification. After the user confirms the spec, it calls `to-tickets`.
 4. Use `to-tickets` when the work must be split into tracer-bullet vertical slices with blocking edges. After the user confirms the frontier ticket, it calls `implement` for one ticket.

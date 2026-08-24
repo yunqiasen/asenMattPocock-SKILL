@@ -23,10 +23,10 @@ usage() {
     '  --skill <name>    Repeat to select one or more skills.' \
     '  --workflow <name> Repeat to install a named workflow and its required skills.' \
     '  --with-optional   Include optional conditional-path skills for selected workflows.' \
-    '  --all             Install all 16 skills.' \
+    '  --all             Install all 15 skills.' \
     '  --source <value>  Override the GitHub source or use a local checkout.' \
     '  --symlink         Use symlinks when supported instead of copies.' \
-    '  --list            List the 16 skills and their dependencies.' \
+    '  --list            List the 15 skills and their dependencies.' \
     '  --list-workflows  List workflow required/optional skill closures.' \
     '  --help            Show this help.'
 }
