@@ -23,6 +23,7 @@ usage() {
     '  --skill <name>    Repeat to select one or more skills.' \
     '  --workflow <name> Repeat to install a named workflow and its required skills.' \
     '  --with-optional   Include optional conditional-path skills for selected workflows.' \
+    '  --no-ask-matt     Skip the ask-matt router bundled with most workflows.' \
     '  --all             Install all 15 skills.' \
     '  --source <value>  Override the GitHub source or use a local checkout.' \
     '  --symlink         Use symlinks when supported instead of copies.' \
@@ -39,10 +40,12 @@ list=false
 all=false
 list_workflows=false
 with_optional=false
+no_ask_matt=false
 agents=()
 requested=()
 workflows=()
 optional_skills=()
+bundled_skills=()
 
 while (($# > 0)); do
   case "$1" in
@@ -75,6 +78,10 @@ while (($# > 0)); do
       ;;
     --with-optional)
       with_optional=true
+      shift
+      ;;
+    --no-ask-matt)
+      no_ask_matt=true
       shift
       ;;
     --all)
@@ -150,10 +157,15 @@ if "$with_optional" && ((${#workflows[@]} == 0)); then
   echo "--with-optional requires --workflow." >&2
   exit 2
 fi
+if "$no_ask_matt" && ((${#workflows[@]} == 0)); then
+  echo "--no-ask-matt requires --workflow." >&2
+  exit 2
+fi
 
 if ((${#workflows[@]} > 0)); then
   workflow_mode="workflow"
   if "$with_optional"; then workflow_mode="workflow-optional"; fi
+  if "$no_ask_matt"; then workflow_mode="$workflow_mode-no-bundled"; fi
   workflow_roots="$(node "$RESOLVER" "$MANIFEST" "$workflow_mode" "${workflows[@]}")"
   while IFS= read -r name; do
     requested+=("$name")
@@ -164,6 +176,13 @@ if ((${#workflows[@]} > 0)); then
     while IFS= read -r name; do
       optional_skills+=("$name")
     done <<< "$workflow_optional_skills"
+  fi
+
+  workflow_bundled_skills="$(node "$RESOLVER" "$MANIFEST" workflow-bundled-skills "${workflows[@]}")"
+  if [[ -n "$workflow_bundled_skills" ]]; then
+    while IFS= read -r name; do
+      bundled_skills+=("$name")
+    done <<< "$workflow_bundled_skills"
   fi
 fi
 
@@ -198,6 +217,13 @@ printf 'Installing: %s\n' "${resolved[*]}"
 printf 'Agents: %s\n' "${agents[*]}"
 if ((${#workflows[@]} > 0)); then
   printf 'Workflows: %s\n' "${workflows[*]}"
+fi
+if ((${#bundled_skills[@]} > 0)); then
+  if "$no_ask_matt"; then
+    printf 'Bundled skills omitted (--no-ask-matt): %s\n' "${bundled_skills[*]}"
+  else
+    printf 'Bundled skills included: %s\n' "${bundled_skills[*]}"
+  fi
 fi
 if ((${#optional_skills[@]} > 0)); then
   if "$with_optional"; then

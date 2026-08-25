@@ -2,6 +2,38 @@
 
 基于 [`mattpocock/skills`](https://github.com/mattpocock/skills) 的二开 Skill 仓库，只维护本项目需要的 15 个 AI Agent Skill。
 
+## 快速开始（不需要 clone 本仓库）
+
+**日常使用本仓库，不需要把它 clone 到本地。** `npx` 会直接从 GitHub 拉取 `MattPocock-Fork` 分支并缓存，跑完即用。
+
+```bash
+ASEN="npx -y github:yunqiasen/asenMattPocock-SKILL#MattPocock-Fork"
+TARGET="/你的项目路径"
+
+# 第一步：初始化目标项目（每个新项目一次）
+$ASEN init --project "$TARGET"
+
+# 第二步：按工作流安装 Skill
+$ASEN install --project "$TARGET" --agent codex --workflow standard
+```
+
+前提条件：
+
+| 条件 | 说明 |
+|---|---|
+| Node.js >= 18 | `npx` 随 npm 提供 |
+| 能访问 GitHub | 拉取 `MattPocock-Fork` 分支 |
+| 仓库为 public | 无需配置 token |
+
+什么时候才需要 clone：
+
+| 你要做的事 | 需要 clone 吗 |
+|---|---|
+| 给项目做初始化 | 不需要 |
+| 给项目安装 Skill | 不需要 |
+| 查看有哪些 Skill 和工作流 | 不需要，用 `$ASEN install --list` |
+| 修改 Skill 内容、调整工作流、同步上游 | 需要，见[二开本仓库时才需要 clone](#7-二开本仓库时才需要-clone) |
+
 ## 项目定位
 
 ```text
@@ -22,7 +54,7 @@ MattPocock-Fork 二开分支，日常开发分支，也是安装源
 
 ## 安装
 
-安装分两件独立的事，**都是命令行，都不需要装 skill**：
+安装分两件独立的事，**都是命令行，都不需要装 skill，也都不需要 clone 本仓库**：
 
 | 事情 | 命令 | 谁执行 | 何时做 |
 |---|---|---|---|
@@ -33,8 +65,8 @@ MattPocock-Fork 二开分支，日常开发分支，也是安装源
 
 | 方式 | 命令前缀 | 是否需要 clone | 适用 |
 |---|---|---|---|
-| **npx 直跑（推荐）** | `npx -y github:yunqiasen/asenMattPocock-SKILL#MattPocock-Fork` | 不需要 | 日常使用，npx 会缓存 |
-| 本地 clone | `./scripts/install-skills.sh` / `./scripts/init-project.sh` | 需要 | 二开本仓库时 |
+| **npx 直跑（推荐）** | `npx -y github:yunqiasen/asenMattPocock-SKILL#MattPocock-Fork` | 不需要 | 日常使用，npx 自动拉取并缓存分支 |
+| 本地 clone | `./scripts/install-skills.sh` / `./scripts/init-project.sh` | 需要 | 只在二开本仓库时用 |
 
 下文统一用一个变量简化命令：
 
@@ -61,9 +93,11 @@ npx -y "github:yunqiasen/asenMattPocock-SKILL#<commit-sha>" install --list-workf
 2. **作用域**：项目级或全局
 3. **工作流**：只安装这条工作流需要的 Skill，不默认安装全部 15 个
 
-### 1. 项目初始化（一条命令，不装任何 Skill）
+### 1. 项目初始化（一条命令，不装任何 Skill，不需要 clone）
 
 初始化产出的内容是**固定模板文本**，判断项也全部可脚本推断，所以用命令行完成，不占用 AI 上下文。
+
+`npx` 会自行拉取并缓存 `MattPocock-Fork` 分支，本机无需存在本仓库副本。
 
 ```bash
 $ASEN init --project "/Users/yunqiroot/Desktop/项目/中"
@@ -108,9 +142,9 @@ $ASEN init --project "/Users/yunqiroot/Desktop/项目/中" --dry-run
 | Bug 调试 | 否 | 从当前对话和 Git diff 即可完成审查 |
 | 研究后开发 | 进入 `grill-with-docs` 前需要 | 单独 `research` 不需要 |
 
-### 2. 按工作流安装 Skill（项目级）
+### 2. 按工作流安装 Skill（项目级，不需要 clone）
 
-项目级安装只对目标项目生效。
+项目级安装只对目标项目生效。命令从任意目录运行都可以，`--project` 指向真正开发的项目。
 
 ```bash
 TARGET="/Users/yunqiroot/Desktop/项目/中"
@@ -133,7 +167,7 @@ Codex：      目标项目/.agents/skills/<skill-name>/
 锁定文件：   目标项目/skills-lock.json
 ```
 
-### 3. 全局安装
+### 3. 全局安装（不需要 clone）
 
 全局安装对当前用户所有项目生效，不写入当前项目目录。
 
@@ -153,36 +187,77 @@ Codex 用户级 Skill 目录是 `~/.agents/skills`，不是 `~/.codex/skills`。
 
 ### 4. 六条工作流的安装闭包
 
-推荐按工作流安装，不要直接装全部 15 个。安装器按 [`skills/manifest.json`](skills/manifest.json) 展开运行时会调用的必需 Skill；条件分支 Skill 默认不装，可用 `--with-optional` 补齐。
+推荐按工作流安装，不要直接装全部 15 个。安装器按 [`skills/manifest.json`](skills/manifest.json) 展开两类 Skill：
+
+| 类别 | 含义 | 默认是否安装 |
+|---|---|---|
+| 入口 + 必需依赖 | 工作流运行时会被 `Call the Skill tool with "name"` 显式调用的 Skill，递归展开 | 是 |
+| 捆绑 Skill | 工作流不调用，但同场景常用的辅助 Skill（目前只有 `ask-matt` 路由器） | 是，`--no-ask-matt` 可关 |
 
 客户端会常驻已安装 Skill 的名称和描述，完整 `SKILL.md` 在触发后才加载。按工作流安装主要减少常驻元数据、Skill 选择噪音和后续正文加载范围。
 
-| 使用场景 | 命令核心参数 | 需先 `init` | 必需 | 可选 | 必需 Skill | 可选 Skill |
-|---|---|---|---:|---:|---|---|
-| 简单任务 | `--workflow simple` | 否 | 3 | 2 | `grilling`、`tdd`、`code-review` | `codebase-design`、`prototype` |
-| 标准开发 | `--workflow standard` | 是 | 8 | 2 | `grill-with-docs`、`grilling`、`domain-modeling`、`to-spec`、`to-tickets`、`implement`、`tdd`、`code-review` | `codebase-design`、`prototype` |
-| 模糊大任务 | `--workflow wayfinder` | 是 | 8 | 3 | `wayfinder`、`grilling`、`domain-modeling`、`to-spec`、`to-tickets`、`implement`、`tdd`、`code-review` | `research`、`codebase-design`、`prototype` |
-| 架构改进 | `--workflow architecture` | 进 `to-spec` 前 | 9 | 1 | `improve-codebase-architecture`、`codebase-design`、`grilling`、`domain-modeling`、`to-spec`、`to-tickets`、`implement`、`tdd`、`code-review` | `prototype` |
-| Bug 调试 | `--workflow bug` | 否 | 2 | 0 | `diagnosing-bugs`、`code-review` | 无 |
-| 研究后开发 | `--workflow research` | 进 `grill-with-docs` 前 | 9 | 2 | `research`、`grill-with-docs`、`grilling`、`domain-modeling`、`to-spec`、`to-tickets`、`implement`、`tdd`、`code-review` | `codebase-design`、`prototype` |
-| 全量安装 | `--all` | 视工作流 | 15 | 0 | 全部 15 个 Skill | 无 |
+| 使用场景 | 命令核心参数 | 需先 `init` | 数量 | 安装的 Skill |
+|---|---|---|---:|---|
+| 简单任务 | `--workflow simple` | 否 | 6 | `grilling`、`tdd`、`code-review`、`codebase-design`、`prototype`、`ask-matt` |
+| 标准开发 | `--workflow standard` | 是 | 11 | `grill-with-docs`、`grilling`、`domain-modeling`、`to-spec`、`to-tickets`、`implement`、`tdd`、`code-review`、`codebase-design`、`prototype`、`ask-matt` |
+| 模糊大任务 | `--workflow wayfinder` | 是 | 12 | `wayfinder`、`grilling`、`domain-modeling`、`research`、`prototype`、`codebase-design`、`to-spec`、`to-tickets`、`implement`、`tdd`、`code-review`、`ask-matt` |
+| 架构改进 | `--workflow architecture` | 进 `to-spec` 前 | 11 | `improve-codebase-architecture`、`codebase-design`、`prototype`、`grilling`、`domain-modeling`、`to-spec`、`to-tickets`、`implement`、`tdd`、`code-review`、`ask-matt` |
+| Bug 调试 | `--workflow bug` | 否 | 2 | `diagnosing-bugs`、`code-review` |
+| 研究后开发 | `--workflow research` | 进 `grill-with-docs` 前 | 11 | `research`、`grill-with-docs`、`grilling`、`domain-modeling`、`to-spec`、`to-tickets`、`implement`、`tdd`、`code-review`、`codebase-design`、`prototype` |
+| 全量安装 | `--all` | 视工作流 | 15 | 全部 15 个 Skill |
 
-预装条件分支：
-
-```bash
-$ASEN install --project "$TARGET" --agent codex --workflow wayfinder --with-optional
-```
-
-`--with-optional` 的用途：测试 Seam 不明确时 `tdd` 可能调用 `codebase-design`；UI 方案不明确时 `codebase-design` 可能调用 `prototype`；`wayfinder` 只有产生对应类型的 decision Ticket 时才需要 `research` 或 `prototype`。不走这些分支时不必安装。
-
-查看每条工作流的闭包和数量：
+多条工作流可以一次装，安装器自动去重：
 
 ```bash
-$ASEN install --list-workflows
-$ASEN install --list
+$ASEN install --project "$TARGET" --agent codex \
+  --workflow standard --workflow wayfinder --workflow bug --workflow architecture
 ```
 
-正式安装前会打印 `Installing: ...`，便于确认没有多装或漏装。
+这四条并集正好是 15 个，也就是除 Bug 调试外的所有 Skill。
+
+#### 为什么 `prototype` 和 `codebase-design` 是必需的
+
+两者都被显式调用，属于运行时硬依赖：
+
+| 调用方 | 被调用 | 触发条件 |
+|---|---|---|
+| `wayfinder` | `prototype`、`research` | 产生 `wayfinder:prototype` 或 `wayfinder:research` 类型的 decision Ticket 时 |
+| `codebase-design` | `prototype` | UI 方案不明确，需要对比多个可运行方案时 |
+| `tdd` | `codebase-design` | 模块深度、Seam 位置或接口形状本身存在疑问时 |
+| `improve-codebase-architecture` | `codebase-design` | 全程使用其架构术语和 design-it-twice 模式 |
+
+因为 `tdd` 出现在除 Bug 调试外的每条工作流里，`codebase-design` 和 `prototype` 也就随之进入这些工作流的必需闭包。漏装会导致运行到一半找不到 Skill。
+
+#### `ask-matt` 的捆绑规则
+
+`ask-matt` 是路由器，任何工作流内部都不会调用它，但用户选不准入口时需要它。因此它按**捆绑**方式安装，不写进运行时依赖：
+
+| 工作流 | 是否捆绑 `ask-matt` | 原因 |
+|---|---|---|
+| 简单任务 | 是 | 判断该走最小流程还是标准流程 |
+| 标准开发 | 是 | 判断该走标准流程还是先探索 |
+| 模糊大任务 | 是 | 判断该建地图还是直接写规格 |
+| 架构改进 | 是 | 判断该扫架构还是走标准开发 |
+| Bug 调试 | 否 | 入口唯一，没有可路由的分支 |
+| 研究后开发 | 否 | 入口唯一，`research` 之后路径已固定 |
+
+不需要路由器时关掉：
+
+```bash
+$ASEN install --project "$TARGET" --agent codex --workflow standard --no-ask-matt
+```
+
+#### 校验闭包
+
+```bash
+$ASEN install --list-workflows   # 每条工作流的完整闭包和数量
+$ASEN install --list             # 15 个 Skill 的调用模式和依赖
+$ASEN check                      # 校验 manifest 与每个 SKILL.md 的真实调用是否一致
+```
+
+`check` 会逐个比对 `SKILL.md` 里的 `Call the Skill tool with "name"` 与 `manifest.json` 的 `dependsOn`，同时检查调用模式在 `SKILL.md` 和 `agents/openai.yaml` 之间是否一致。修改任何 Skill 的内部调用后都应先跑它。
+
+正式安装前会打印 `Installing: ...` 和 `Bundled skills included: ...`，便于确认没有多装或漏装。
 
 ### 5. 单独安装某个 Skill
 
@@ -213,6 +288,8 @@ npx skills@latest add \
 
 ### 7. 二开本仓库时才需要 clone
 
+只有以下情况需要本地副本：修改 Skill 正文、调整工作流编排、同步上游、改安装脚本。日常给项目 `init` 和 `install` 都不需要。
+
 ```bash
 cd "/Users/yunqiroot/Documents/ChatGPT/Agent-项目"
 git clone git@github.com:yunqiasen/asenMattPocock-SKILL.git
@@ -242,13 +319,15 @@ git remote add upstream git@github.com:mattpocock/skills.git
 | 5 | **Bug 调试** | 顽固 Bug、修 A 坏 B、根因不清楚 | ① `diagnosing-bugs`<br>② 复现 → 最小化 → 验证假设 → 修复 → 回归测试<br>③ 【确认门】用户确认进入审查<br>④ `code-review`（`diagnosing-bugs` 内部调用）<br>⑤ 修复有效审查意见<br>⑥ 提交 | 修复完成、回归测试通过、审查一次后提交 |
 | 6 | **研究后开发** | 技术、库、SDK 或方案不熟悉，需要先查清楚再开发 | `research` 阶段不需要初始化；进入 `grill-with-docs` / `to-spec` 前，新项目先在命令行运行一次 `asen-skills init`<br>① `research` → 生成 `research/*.md`<br>② **停止并提示用户手动启动** `grill-with-docs`（不是 `research` 内部调用）<br>③ `grill-with-docs`（内部调用：`grilling` + `domain-modeling`）<br>④ 【确认门】确认对齐结果<br>⑤ `to-spec`（`grill-with-docs` 内部调用）<br>⑥ 【确认门】确认 spec<br>⑦ `to-tickets`（`to-spec` 内部调用）<br>⑧ 【确认门】确认 frontier Ticket<br>⑨ `implement`（`to-tickets` 内部调用）<br>⑩ `tdd`（`implement` 内部调用）<br>⑪ `code-review`（`implement` 内部调用） | 调研结果进入标准开发链；不让研究 Skill 越过人工规划门 |
 
-`--with-optional` 用于预装条件分支：测试 Seam 不明确时，`tdd` 可能调用 `codebase-design`；UI 方案不明确时，`codebase-design` 可能调用 `prototype`；`wayfinder` 只有产生对应类型的 decision Ticket 时才需要 `research` 或 `prototype`。不走这些分支时不必安装。
+上表中每个 Skill 都是运行时硬依赖，没有可选项。`tdd -> codebase-design -> prototype` 这条链让 `codebase-design` 和 `prototype` 进入除 Bug 调试外的所有工作流；`wayfinder` 另外直接依赖 `research` 和 `prototype`。
 
 ## 运行时调用规则
 
 - `SKILL.md` 中明确写出的 `Call the Skill tool with "name"` 才是运行时内部调用
 - [`skills/manifest.json`](skills/manifest.json) 的 `dependsOn` 只用于安装依赖展开，不是工作流执行顺序
-- `workflows.<name>.optionalSkills` 是条件分支 Skill，只有 `--with-optional` 才随工作流安装
+- `workflows.<name>.bundledSkills` 是同场景辅助 Skill，默认随工作流安装，用 `--no-ask-matt` 关闭；它们不参与运行时调用
+- `workflows.<name>.optionalSkills` 保留给将来真正的条件分支，当前六条工作流都为空
+- `dependsOn` 必须与 `SKILL.md` 的真实调用一致，由 `asen-skills check` 强制校验
 - 项目初始化由命令行 `asen-skills init` 完成，不是 Skill，不占用 Agent 上下文，也不属于任何工作流闭包
 - `grilling`：顶层小任务可进入执行；嵌套调用只返回对齐结果
 - `to-spec -> to-tickets -> implement`：按顺序衔接，每一步都遵守自己的确认门
@@ -362,8 +441,9 @@ git merge main
 ### 4. 移植后验证
 
 ```bash
-scripts/install-skills.sh --help
+scripts/check-manifest.mjs
 scripts/install-skills.sh --list
+scripts/install-skills.sh --list-workflows
 git diff --check
 ```
 
@@ -387,13 +467,14 @@ asenMattPocock-SKILL/
 ├── package.json                           # 提供 asen-skills 命令，支持 npx 免 clone 调用
 ├── .gitignore                             # 忽略本地依赖和客户端状态
 ├── bin/
-│   └── cli.mjs                            # asen-skills 命令入口：init / install / list
+│   └── cli.mjs                            # asen-skills 命令入口：init / install / list / check
 ├── templates/                             # 项目初始化用的固定模板文本
 │   ├── domain.md                          # 领域文档布局和读取规则
 │   ├── issue-tracker-github.md            # GitHub Issues tracker 配置
 │   ├── issue-tracker-local.md             # 本地 Markdown tracker 配置
 │   └── triage-labels.md                   # 五个 triage 标签映射（默认不写入）
 ├── scripts/
+│   ├── check-manifest.mjs                 # 校验 manifest 与 SKILL.md 真实调用是否一致
 │   ├── init-project.sh                    # 纯 bash 项目初始化，不需要 AI
 │   ├── install-skills.sh                  # Claude/Codex 项目级与全局安装入口
 │   ├── list-skills.sh                     # 列出仓库内所有 SKILL.md

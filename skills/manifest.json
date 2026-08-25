@@ -2,28 +2,52 @@
   "repository": "yunqiasen/asenMattPocock-SKILL",
   "developmentBranch": "MattPocock-Fork",
   "workflows": {
-    "simple": { "entrySkills": ["grilling"], "optionalSkills": ["codebase-design", "prototype"] },
-    "standard": { "entrySkills": ["grill-with-docs"], "optionalSkills": ["codebase-design", "prototype"] },
-    "wayfinder": { "entrySkills": ["wayfinder"], "optionalSkills": ["research", "codebase-design", "prototype"] },
-    "architecture": { "entrySkills": ["improve-codebase-architecture"], "optionalSkills": ["prototype"] },
-    "bug": { "entrySkills": ["diagnosing-bugs"], "optionalSkills": [] },
-    "research": { "entrySkills": ["research", "grill-with-docs"], "optionalSkills": ["codebase-design", "prototype"] }
+    "simple": {
+      "entrySkills": ["grilling"],
+      "bundledSkills": ["ask-matt"],
+      "optionalSkills": []
+    },
+    "standard": {
+      "entrySkills": ["grill-with-docs"],
+      "bundledSkills": ["ask-matt"],
+      "optionalSkills": []
+    },
+    "wayfinder": {
+      "entrySkills": ["wayfinder"],
+      "bundledSkills": ["ask-matt"],
+      "optionalSkills": []
+    },
+    "architecture": {
+      "entrySkills": ["improve-codebase-architecture"],
+      "bundledSkills": ["ask-matt"],
+      "optionalSkills": []
+    },
+    "bug": {
+      "entrySkills": ["diagnosing-bugs"],
+      "bundledSkills": [],
+      "optionalSkills": []
+    },
+    "research": {
+      "entrySkills": ["research", "grill-with-docs"],
+      "bundledSkills": [],
+      "optionalSkills": []
+    }
   },
   "skills": {
     "grilling": { "bucket": "productivity", "invocation": "automatic+manual", "dependsOn": ["tdd"] },
     "grill-with-docs": { "bucket": "engineering", "invocation": "manual-only", "dependsOn": ["grilling", "domain-modeling", "to-spec"] },
     "domain-modeling": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": [] },
-    "wayfinder": { "bucket": "engineering", "invocation": "manual-only", "dependsOn": ["grilling", "domain-modeling", "to-spec"] },
-    "tdd": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": ["code-review"] },
+    "wayfinder": { "bucket": "engineering", "invocation": "manual-only", "dependsOn": ["grilling", "domain-modeling", "to-spec", "research", "prototype"] },
+    "tdd": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": ["code-review", "codebase-design"] },
     "code-review": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": [] },
-    "ask-matt": { "bucket": "engineering", "invocation": "manual-only", "dependsOn": ["grilling", "grill-with-docs", "domain-modeling", "wayfinder", "tdd", "code-review", "to-spec", "to-tickets", "implement", "diagnosing-bugs", "research", "improve-codebase-architecture", "codebase-design", "prototype"] },
+    "ask-matt": { "bucket": "engineering", "invocation": "manual-only", "dependsOn": [] },
     "to-spec": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": ["to-tickets"] },
     "to-tickets": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": ["implement"] },
     "implement": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": ["tdd", "code-review"] },
     "diagnosing-bugs": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": ["code-review"] },
     "research": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": [] },
     "improve-codebase-architecture": { "bucket": "engineering", "invocation": "manual-only", "dependsOn": ["codebase-design", "grilling", "domain-modeling", "to-spec"] },
-    "codebase-design": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": [] },
+    "codebase-design": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": ["prototype"] },
     "prototype": { "bucket": "engineering", "invocation": "automatic+manual", "dependsOn": [] }
   }
 }

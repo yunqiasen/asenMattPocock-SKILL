@@ -7,38 +7,14 @@ const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 function getWorkflow(name) {
   const workflow = manifest.workflows?.[name];
   if (!workflow) throw new Error(`Unknown workflow: ${name}`);
-  if (Array.isArray(workflow)) return { entrySkills: workflow, optionalSkills: [] };
+  if (Array.isArray(workflow)) {
+    return { entrySkills: workflow, bundledSkills: [], optionalSkills: [] };
+  }
   return {
     entrySkills: workflow.entrySkills ?? [],
+    bundledSkills: workflow.bundledSkills ?? [],
     optionalSkills: workflow.optionalSkills ?? [],
   };
-}
-
-if (mode === "list") {
-  for (const [name, skill] of Object.entries(manifest.skills)) {
-    const dependencies = skill.dependsOn.length ? skill.dependsOn.join(", ") : "none";
-    console.log(`${name}\t${skill.invocation}\t${dependencies}`);
-  }
-  process.exit(0);
-}
-
-let names = args;
-if (mode === "workflow" || mode === "workflow-optional") {
-  names = [];
-  for (const workflowName of args) {
-    const { entrySkills, optionalSkills } = getWorkflow(workflowName);
-    names.push(...entrySkills);
-    if (mode === "workflow-optional") names.push(...optionalSkills);
-  }
-}
-
-if (mode === "workflow-optional-skills") {
-  const optionalSkills = new Set();
-  for (const workflowName of args) {
-    for (const name of getWorkflow(workflowName).optionalSkills) optionalSkills.add(name);
-  }
-  console.log([...optionalSkills].join("\n"));
-  process.exit(0);
 }
 
 function resolveNames(rootNames) {
@@ -62,15 +38,61 @@ function resolveNames(rootNames) {
   return ordered;
 }
 
-if (mode === "list-workflows") {
-  for (const name of Object.keys(manifest.workflows ?? {})) {
-    const { entrySkills, optionalSkills } = getWorkflow(name);
-    const required = resolveNames(entrySkills);
-    const optional = resolveNames([...entrySkills, ...optionalSkills]).filter(skill => !required.includes(skill));
-    const full = [...required, ...optional];
-    console.log(`${name}\t${required.length}\t${optional.length}\t${required.join(", ")}\t${optional.join(", ") || "none"}\t${full.length}`);
+if (mode === "list") {
+  for (const [name, skill] of Object.entries(manifest.skills)) {
+    const dependencies = skill.dependsOn.length ? skill.dependsOn.join(", ") : "none";
+    console.log(`${name}\t${skill.invocation}\t${dependencies}`);
   }
   process.exit(0);
+}
+
+if (mode === "list-workflows") {
+  for (const name of Object.keys(manifest.workflows ?? {})) {
+    const { entrySkills, bundledSkills, optionalSkills } = getWorkflow(name);
+    const required = resolveNames([...entrySkills, ...bundledSkills]);
+    const optional = resolveNames([...entrySkills, ...bundledSkills, ...optionalSkills])
+      .filter(skill => !required.includes(skill));
+    console.log([
+      name,
+      required.length,
+      optional.length,
+      required.join(", "),
+      optional.join(", ") || "none",
+      required.length + optional.length,
+    ].join("\t"));
+  }
+  process.exit(0);
+}
+
+if (mode === "workflow-optional-skills") {
+  const optionalSkills = new Set();
+  for (const workflowName of args) {
+    for (const name of getWorkflow(workflowName).optionalSkills) optionalSkills.add(name);
+  }
+  console.log([...optionalSkills].join("\n"));
+  process.exit(0);
+}
+
+if (mode === "workflow-bundled-skills") {
+  const bundledSkills = new Set();
+  for (const workflowName of args) {
+    for (const name of getWorkflow(workflowName).bundledSkills) bundledSkills.add(name);
+  }
+  console.log([...bundledSkills].join("\n"));
+  process.exit(0);
+}
+
+let names = args;
+if (mode.startsWith("workflow")) {
+  const withOptional = mode.includes("optional");
+  const withBundled = !mode.includes("no-bundled");
+  names = [];
+  for (const workflowName of args) {
+    const { entrySkills, bundledSkills, optionalSkills } = getWorkflow(workflowName);
+    names.push(...entrySkills);
+    if (withBundled) names.push(...bundledSkills);
+    if (withOptional) names.push(...optionalSkills);
+  }
 }
 
 console.log(resolveNames(names).join("\n"));

@@ -23,7 +23,10 @@
 - 仅手动 Skill 必须设置 `disable-model-invocation: true`，并在 `agents/openai.yaml` 设置 `policy.allow_implicit_invocation: false`。
 - 自动 + 手动的工作流节点通过确认门保留人工控制，允许被上游 Skill 调用，也允许用户直接启动。
 - `scripts/install-skills.sh` 是对外安装入口。它必须按 `skills/manifest.json` 自动展开 Skill 或 `--workflow` 的必需依赖闭包，支持项目级、全局、Claude Code 和 Codex。
-- 条件分支 Skill 记录在 `workflows.<name>.optionalSkills`，只有 `--with-optional` 才随工作流安装。不要把条件调用混入必需的运行时 `dependsOn`。
+- `dependsOn` 必须与 `SKILL.md` 中真实的 `Call the Skill tool with "name"` 一致。有显式调用就是必需依赖，不得降级成可选。
+- 条件分支 Skill 记录在 `workflows.<name>.optionalSkills`，只有 `--with-optional` 才随工作流安装。当前六条工作流都为空，因为所有依赖都是显式调用。
+- 同场景辅助 Skill 记录在 `workflows.<name>.bundledSkills`，默认随工作流安装，用 `--no-ask-matt` 关闭。它们不参与运行时调用，不得写进 `dependsOn`。
+- 改任何 Skill 的内部调用后，必须重新核对 `dependsOn`，并跑 `--list-workflows` 确认闭包没有漏装。
 - 项目初始化由 `scripts/init-project.sh` 完成，是纯 bash 命令，不是 Skill。它的产出全部是 `templates/` 中的固定文本加脚本生成的 `## Agent skills` 块，不需要 AI 判断，也不占用 Agent 上下文。
 - 禁止把项目初始化重新做成 Skill。输出固定、判断项可脚本推断的工作一律用命令行实现。
 - `init-project.sh` 必须保持幂等：`## Agent skills` 块原地替换，`docs/agents/*.md` 默认跳过已存在文件。
@@ -41,12 +44,14 @@
 修改后至少执行：
 
 ```bash
-scripts/install-skills.sh --help
+scripts/check-manifest.mjs
 scripts/install-skills.sh --list
 scripts/install-skills.sh --list-workflows
 scripts/init-project.sh --help
 bin/cli.mjs --help
 ```
+
+`scripts/check-manifest.mjs` 是硬性门槛：它比对每个 `SKILL.md` 的 `Call the Skill tool with "name"` 与 `manifest.json` 的 `dependsOn`，并检查调用模式在 `SKILL.md` 和 `agents/openai.yaml` 之间是否一致。它失败就不允许提交。
 
 并在临时 Git 项目中验证：
 
