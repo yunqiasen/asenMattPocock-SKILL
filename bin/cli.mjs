@@ -7,7 +7,6 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const [command, ...args] = process.argv.slice(2);
 
 const shellCommands = {
-  init: "scripts/init-project.sh",
   install: "scripts/install-skills.sh",
   list: "scripts/list-skills.sh",
 };
@@ -20,15 +19,16 @@ function usage() {
   console.log(`Usage: asen-skills <command> [options]
 
 Commands:
-  init      Initialize a target project (docs/agents + agent instructions block)
   install   Install skills or a workflow into a project or globally
   list      List every SKILL.md in this repository
   check     Verify manifest.json against the real skill calls in every SKILL.md
 
 Examples:
-  npx github:yunqiasen/asenMattPocock-SKILL#MattPocock-Fork init --project /path/to/project
   npx github:yunqiasen/asenMattPocock-SKILL#MattPocock-Fork install --project /path/to/project --agent codex --workflow standard
   npx github:yunqiasen/asenMattPocock-SKILL#MattPocock-Fork install --list-workflows
+
+No project setup is required. Skills write their specs and tickets to .scratch/
+by default, or to GitHub Issues when the repository has a GitHub remote.
 
 Run "asen-skills <command> --help" for command options.`);
 }

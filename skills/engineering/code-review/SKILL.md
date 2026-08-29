@@ -10,7 +10,7 @@ Two-axis review of all changes since a fixed point the user supplies, including 
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
 
-Use the configured issue tracker when `docs/agents/issue-tracker.md` exists. If it does not, continue with the current conversation and repository files; project setup improves spec discovery but is not required for review.
+Look for specs in GitHub Issues when the repository has a GitHub remote, and under `.scratch/` otherwise. Neither is required: the current conversation and repository files are enough to review.
 
 ## Process
 
@@ -26,7 +26,7 @@ Before going further, confirm the fixed point resolves (`git rev-parse <fixed-po
 
 Look for the originating spec, in this order:
 
-1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.), fetched via the workflow in `docs/agents/issue-tracker.md`.
+1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.), fetched with `gh issue view` when a GitHub remote exists.
 2. A path the user passed as an argument.
 3. The confirmed task, acceptance criteria, or decisions in the current conversation.
 4. A spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.

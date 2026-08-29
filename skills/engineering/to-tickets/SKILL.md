@@ -7,7 +7,7 @@ description: Break an approved plan or spec into tracer-bullet tickets with bloc
 
 Break a plan, spec, or conversation into a set of **tickets**: tracer-bullet vertical slices, each declaring the tickets that **block** it.
 
-Read the issue tracker configuration from `docs/agents/issue-tracker.md`. If it is missing, tell the user to run the project initializer (`asen-skills init --project <path>`), then default to the local-markdown tracker for this session.
+Pick the issue tracker without any project setup step: use GitHub Issues via the `gh` CLI when `git remote -v` points at GitHub and `gh auth status` succeeds, otherwise write Markdown under `.scratch/<feature-slug>/`. State which one you chose in one line before publishing anything. If `docs/agents/issue-tracker.md` exists, follow it instead.
 
 ## Process
 
@@ -56,10 +56,10 @@ Iterate until the user approves the breakdown.
 
 ### 5. Publish the tickets to the configured tracker
 
-Publish the approved tickets. **How** depends on the tracker recorded in `docs/agents/issue-tracker.md`; the tickets are the same either way, only the shape of the blocking edges changes:
+Publish the approved tickets to the tracker chosen at the start of this skill. The tickets are the same either way, only the shape of the blocking edges changes:
 
 - **Local files** → write one file per ticket under `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the numbers/titles it depends on. Use the per-ticket file template below: one ticket per file, never a single combined file.
-- **GitHub** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use GitHub's native blocking or sub-issue relationship where available; otherwise set each ticket's "Blocked by" to the blocking issues. Apply the mapped `ready-for-agent` label unless instructed otherwise.
+- **GitHub** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use GitHub's native blocking or sub-issue relationship where available; otherwise set each ticket's "Blocked by" to the blocking issues. Apply a `ready-for-agent` label when that label already exists on the repository; skip labelling rather than creating labels.
 
 Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
 

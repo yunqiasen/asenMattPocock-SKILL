@@ -36,13 +36,13 @@ _Avoid_: 隐式复制
 由 `skills/manifest.json` 中工作流的入口 Skill 和递归必需依赖组成的完整安装集合。条件分支 Skill 不在闭包内，需要 `--with-optional` 才安装。
 _Avoid_: 运行顺序
 
-**项目初始化**:
-用命令行 `asen-skills init` 为目标项目写入 `docs/agents/` 配置和 `## Agent skills` 块。产出是固定模板文本，由 bash 完成，不是 Skill，不消耗 Agent 上下文。
-_Avoid_: 初始化 Skill
+**Tracker 自动判断**:
+需要发布规格或 Ticket 的 Skill 在运行时自行决定落地位置：有 GitHub remote 且 `gh` 可用写 GitHub Issues，否则写 `.scratch/<feature-slug>/`。不依赖任何预先生成的配置文件。
+_Avoid_: 项目初始化
 
-**固定模板文本**:
-`templates/` 下逐字复制到目标项目的文件内容。判断项可由脚本推断，因此不需要模型参与。
-_Avoid_: 提示词模板
+**零配置安装**:
+装完 Skill 即可直接进入工作流，目标项目不需要任何前置配置文件或 setup 步骤。
+_Avoid_: 初始化命令
 
 **目标项目**:
 真正使用 Skill 的项目目录，不是本 Skill 仓库目录。
@@ -57,7 +57,7 @@ _Avoid_: 目标项目
 _Avoid_: 开发分支
 
 **二开分支**:
-本仓库的 `MattPocock-Fork`，保存删减后的 15 个 Skill、工作流编排、初始化命令和安装逻辑，也是对外安装源。
+本仓库的 `MattPocock-Fork`，保存删减后的 15 个 Skill、工作流编排和安装逻辑，也是对外安装源。
 _Avoid_: 上游镜像
 
 **上游审查基线**:

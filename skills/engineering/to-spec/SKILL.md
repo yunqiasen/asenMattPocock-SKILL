@@ -5,7 +5,7 @@ description: "Turn an agreed conversation into a formal spec, publish it to the 
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know.
 
-Read the issue tracker configuration from `docs/agents/issue-tracker.md`. If it is missing, tell the user to run the project initializer (`asen-skills init --project <path>`), then default to the local-markdown tracker for this session.
+Pick the issue tracker without any project setup step: use GitHub Issues via the `gh` CLI when `git remote -v` points at GitHub and `gh auth status` succeeds, otherwise write Markdown under `.scratch/<feature-slug>/`. State which one you chose in one line before publishing anything. If `docs/agents/issue-tracker.md` exists, follow it instead.
 
 ## Process
 
@@ -15,7 +15,7 @@ Read the issue tracker configuration from `docs/agents/issue-tracker.md`. If it 
 
 Check with the user that these seams match their expectations.
 
-3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage.
+3. Write the spec using the template below, then publish it to the tracker chosen above. On GitHub, apply a `ready-for-agent` label only when that label already exists; skip labelling rather than creating labels.
 
 <spec-template>
 

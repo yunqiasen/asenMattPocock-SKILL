@@ -1,6 +1,6 @@
 # asenMattPocock Skills
 
-这是一个只维护 15 个 Agent Skill 的二开仓库，另外提供两条命令行入口：项目初始化和 Skill 安装。不要恢复上游已删除的发布系统、官网文档、实验 Skill 或杂项 Skill。
+这是一个只维护 15 个 Agent Skill 的二开仓库，对外只提供一条命令行入口：Skill 安装。不要恢复上游已删除的发布系统、官网文档、实验 Skill 或杂项 Skill。
 
 ## 分支约束
 
@@ -14,7 +14,6 @@
 ## 目录约束
 
 - `skills/manifest.json` 是 Skill 名称、调用模式、依赖关系和六个工作流入口的唯一清单。
-- `templates/` 放项目初始化写入目标项目的固定模板文本，不属于任何 Skill 目录。
 - `bin/cli.mjs` 是 `asen-skills` 命令入口，只做参数转发；真实逻辑在 `scripts/`。
 - `skills/engineering/` 放工程 Skill，`skills/productivity/` 放通用工作流 Skill。
 - 每个 Skill 必须包含 `SKILL.md` 和 `agents/openai.yaml`。
@@ -27,9 +26,10 @@
 - 条件分支 Skill 记录在 `workflows.<name>.optionalSkills`，只有 `--with-optional` 才随工作流安装。当前六条工作流都为空，因为所有依赖都是显式调用。
 - 同场景辅助 Skill 记录在 `workflows.<name>.bundledSkills`，默认随工作流安装，用 `--no-ask-matt` 关闭。它们不参与运行时调用，不得写进 `dependsOn`。
 - 改任何 Skill 的内部调用后，必须重新核对 `dependsOn`，并跑 `--list-workflows` 确认闭包没有漏装。
-- 项目初始化由 `scripts/init-project.sh` 完成，是纯 bash 命令，不是 Skill。它的产出全部是 `templates/` 中的固定文本加脚本生成的 `## Agent skills` 块，不需要 AI 判断，也不占用 Agent 上下文。
-- 禁止把项目初始化重新做成 Skill。输出固定、判断项可脚本推断的工作一律用命令行实现。
-- `init-project.sh` 必须保持幂等：`## Agent skills` 块原地替换，`docs/agents/*.md` 默认跳过已存在文件。
+- 本项目没有项目初始化步骤。禁止重新引入任何形式的 setup Skill、init 命令或模板目录。
+- 需要 issue tracker 的 Skill 必须自己判断：有 GitHub remote 且 `gh` 可用就写 GitHub Issues，否则写 `.scratch/<feature-slug>/`。这个判断写在 Skill 正文里，不依赖外部配置文件。
+- Skill 不得要求目标项目预先存在 `docs/agents/*.md`。可以在该文件存在时尊重它，但缺失绝不能阻塞流程。
+- Skill 不得创建 GitHub 标签。只在标签已存在时打标，否则跳过。
 - 修改 Skill 调用关系或工作流入口时，同时更新 `skills/manifest.json`、相关 Skill 的 `SKILL.md` 和 README 表格。
 - 所有会落到目标项目的配置都必须使用目标项目自己的路径，不要写死本仓库路径。
 
@@ -47,7 +47,6 @@
 scripts/check-manifest.mjs
 scripts/install-skills.sh --list
 scripts/install-skills.sh --list-workflows
-scripts/init-project.sh --help
 bin/cli.mjs --help
 ```
 
@@ -55,8 +54,7 @@ bin/cli.mjs --help
 
 并在临时 Git 项目中验证：
 
-- `init-project.sh` 的 GitHub 与本地 tracker 自动探测
-- `## Agent skills` 块重复运行不产生重复内容
 - Claude Code 和 Codex 的项目级、全局安装路径
+- 装完的 Skill 在没有任何 `docs/agents/` 配置的项目上也能走通
 
 最终检查 `git status`、Skill 数量、Manifest 中的 15 个名称和 README 安装命令。

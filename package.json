@@ -2,7 +2,7 @@
   "name": "asen-mattpocock-skills",
   "version": "1.0.0",
   "private": false,
-  "description": "Fork of mattpocock/skills trimmed to 15 agent skills, with a workflow installer and a project initializer.",
+  "description": "Fork of mattpocock/skills trimmed to 15 agent skills, with a zero-config workflow installer.",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -12,7 +12,6 @@
     "bin",
     "scripts",
     "skills",
-    "templates",
     "README.md",
     "LICENSE"
   ],
