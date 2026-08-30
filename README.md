@@ -293,6 +293,7 @@ Claude Code 对应目录是 `.claude/skills`。
 - `workflows.<name>.optionalSkills` 保留给将来真正的条件分支，当前六条工作流都为空
 - `dependsOn` 必须与 `SKILL.md` 的真实调用一致，由 `asen-skills check` 强制校验
 - 没有项目初始化步骤：`to-spec`、`to-tickets`、`wayfinder` 各自判断 tracker，有 GitHub remote 且 `gh` 可用就写 Issues，否则写 `.scratch/`
+- 三个 tracker Skill 各自捆绑 `references/github-tracker.md`：tracker 选 GitHub 时按需读取，内含 `gh` 命令速查、标签存在才打、阻塞边写法和认证失败回退 `.scratch/` 的规则
 - `grilling`：顶层小任务可进入执行；嵌套调用只返回对齐结果
 - `to-spec -> to-tickets -> implement`：按顺序衔接，每一步都遵守自己的确认门
 - `tdd`：独立运行时调用一次 `code-review`；被 `implement` 调用时跳过内部审查
@@ -452,8 +453,11 @@ asenMattPocock-SKILL/
     │   ├── research/                      # 一手资料调研
     │   ├── tdd/                           # TDD 红绿重构
     │   ├── to-spec/                       # 对齐结果转规格
+    │   │   └── references/github-tracker.md
     │   ├── to-tickets/                    # 规格转垂直切片 Ticket
+    │   │   └── references/github-tracker.md
     │   └── wayfinder/                     # 模糊大任务探索地图
+        └── references/github-tracker.md
     └── productivity/                      # 通用生产力 Skill
         └── grilling/                      # 通用拷问与最小工作流入口
 ```
