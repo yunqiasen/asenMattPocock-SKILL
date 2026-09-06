@@ -23,6 +23,16 @@ A **seam** is the public boundary you test at: the interface where you observe b
 
 Ask: "What's the public interface, and which seams should we test?"
 
+When the seams are not already approved by the originating spec or ticket, open a seam confirmation gate
+
+1. Show the proposed seams and the behavior each seam observes
+2. Ask the user to confirm them
+3. End the response immediately after the question. Do not write a test or production code in that turn
+4. Continue only after a later user message explicitly confirms the seams
+5. If the user changes a seam, update the plan and reopen the gate
+
+When `implement` passes seams from an approved spec or ticket, treat those seams as already confirmed and do not ask for a duplicate gate
+
 When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose), call the Skill tool with "codebase-design" for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
 
 ## Anti-patterns

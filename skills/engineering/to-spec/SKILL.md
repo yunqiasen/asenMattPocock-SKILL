@@ -13,7 +13,15 @@ Pick the issue tracker without any project setup step: use GitHub Issues via the
 
 2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across the codebase, the better - the ideal number is one.
 
-Check with the user that these seams match their expectations.
+Open a seam confirmation gate before writing the spec
+
+- Show the proposed seams and why each one observes the required behavior
+- Ask the user to confirm the seams
+- End the response immediately after the question. Do not write or publish the spec in that turn
+- Continue only after a later user message explicitly confirms the seams
+- If the user rejects or changes a seam, revise the proposal and reopen this gate
+
+If an approved spec or ticket already contains the seams, carry that decision forward and do not ask for the same confirmation again
 
 3. Write the spec using the template below, then publish it to the tracker chosen above. On GitHub, apply a `ready-for-agent` label only when that label already exists; skip labelling rather than creating labels.
 
@@ -73,6 +81,10 @@ Any further notes about the feature.
 
 </spec-template>
 
-4. Open a confirmation gate. Show the published spec reference, the chosen seams, and the remaining scope. Ask the user to confirm that the spec is ready to split into implementation tickets.
+4. Open the specification handoff gate. Show the published spec reference, the chosen seams, and the remaining scope. Ask the user to confirm that this exact spec is ready to split into implementation tickets.
 
-5. Only after explicit confirmation, call the Skill tool with "to-tickets". If the user rejects the spec, revise it and repeat this gate. Do not call "to-tickets" before confirmation.
+5. End the response immediately after the question. Do not call `to-tickets` in the same turn
+
+6. Continue only after a later user message explicitly confirms this exact spec handoff, then call the Skill tool with "to-tickets"
+
+7. If the user rejects or changes the spec, revise it, republish the affected content, and reopen this gate. Do not treat confirmation of the seams as confirmation of the spec

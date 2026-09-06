@@ -129,9 +129,11 @@ The user may run unblocked tickets in parallel, so expect other sessions to be e
 
 ### Handoff after the map
 
-When the map has no open frontier tickets and no unresolved fog, stop planning. Present the destination and the linked decisions, then ask whether to collapse the map into an implementation spec
+When the map has no open frontier tickets and no unresolved fog, stop planning. Present the destination and the linked decisions, then open a handoff gate asking whether to collapse the map into an implementation spec
 
-After the user confirms the handoff, call the Skill tool with "to-spec". Do not call `to-tickets` or `implement` from inside wayfinder. Those remain downstream confirmation-gated phases. The next path is:
+End the response immediately after the question. Do not call `to-spec` in the same turn
+
+Continue only after a later user message explicitly confirms this handoff, then call the Skill tool with `to-spec`. Do not call `to-tickets` or `implement` from inside wayfinder. Those remain downstream confirmation-gated phases. The next path is:
 
 ```text
 /to-spec -> confirmation -> to-tickets -> confirmation -> implement

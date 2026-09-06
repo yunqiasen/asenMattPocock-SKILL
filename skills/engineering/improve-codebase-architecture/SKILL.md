@@ -72,7 +72,11 @@ Side effects happen inline as decisions crystallize; call the Skill tool with "d
 
 ### Handoff to implementation
 
-After grilling and domain-modeling produce a settled refactoring decision, open a handoff gate. Present the decision and ask whether to formalize it as a spec. After confirmation, call the Skill tool with "to-spec"
+After grilling and domain-modeling produce a settled refactoring decision, open a handoff gate. Present the decision and ask whether to formalize it as a spec
+
+End the response immediately after the question. Do not call `to-spec` in the same turn
+
+Continue only after a later user message explicitly confirms this exact refactoring handoff, then call the Skill tool with `to-spec`
 
 Do not call `to-tickets` or `implement` from inside this skill. The confirmed downstream path is:
 

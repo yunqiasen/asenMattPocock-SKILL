@@ -141,8 +141,10 @@ Required before declaring done:
 
 ## Phase 7: Review gate
 
-Before declaring the fix complete, present the reproduced symptom, the minimised case, the regression result, and the fixed point for the diff. Ask the user to confirm that the repair should enter review
+Before declaring the fix complete, present the reproduced symptom, the minimised case, the regression result, and the fixed point for the diff. Ask the user to confirm that this repair should enter review
 
-- After explicit confirmation, call the Skill tool with "code-review" exactly once
+- End the response immediately after the question. Do not call `code-review` in the same turn
+- Continue only after a later user message explicitly confirms this repair handoff
+- After that confirmation, call the Skill tool with `code-review` exactly once
 - Fix valid review findings and rerun the regression checks, but do not call `code-review` a second time in this diagnosing run
 - Commit the repaired change after review findings are resolved. If the user declines the gate, stop before committing and report the verified repair state

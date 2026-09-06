@@ -38,7 +38,7 @@ Give each ticket its **blocking edges**: the other tickets that must complete be
 
 **Wide refactors are the exception to vertical slicing.** A **wide refactor** is one mechanical change (rename a column, retype a shared symbol) whose **blast radius** fans across the whole codebase, so a single edit breaks thousands of call sites at once and no vertical slice can land green. Don't force it into a tracer bullet; sequence it as **expand–contract**. First expand: add the new form beside the old so nothing breaks. Then migrate the call sites over in batches sized by blast radius (per package, per directory), each batch its own ticket blocked by the expand, keeping CI green batch to batch because the old form still exists. Finally contract: delete the old form once no caller remains, in a ticket blocked by every migrate batch. When even the batches can't stay green alone, keep the sequence but let them share an integration branch that all block a final integrate-and-verify ticket; green is promised only there.
 
-### 4. Quiz the user
+### 4. Ticket breakdown confirmation gate
 
 Present the proposed breakdown as a numbered list. For each ticket, show:
 
@@ -52,7 +52,11 @@ Ask the user:
 - Are the blocking edges correct: does each ticket only depend on tickets that genuinely gate it?
 - Should any tickets be merged or split further?
 
-Iterate until the user approves the breakdown.
+End the response immediately after these questions. Do not publish tickets or call `implement` in the same turn
+
+Continue only after a later user message explicitly approves the breakdown, its granularity, and its blocking edges
+
+If the user rejects or changes the breakdown, revise it and reopen this gate. Do not treat approval of the spec as approval of the ticket breakdown
 
 ### 5. Publish the tickets to the configured tracker
 
@@ -105,8 +109,11 @@ In either form, avoid specific file paths or code snippets: they go stale fast. 
 
 ### 6. Implementation confirmation gate
 
-After publishing, show the first unblocked frontier ticket and ask the user to confirm that implementation may start for that ticket
+After publishing, show the first unblocked frontier ticket, its blockers, and its acceptance criteria. Ask the user to confirm that implementation may start for this exact ticket
 
-- Only after explicit confirmation, call the Skill tool with "implement" for exactly one frontier ticket
+- End the response immediately after the question. Do not call `implement` in the same turn
+- Continue only after a later user message explicitly confirms this exact frontier ticket
+- If the user rejects the ticket or changes its scope, revise the ticket breakdown and reopen the appropriate gate
+- Do not treat approval of the ticket breakdown as approval to implement
 - Do not start every ticket automatically. Each later ticket gets its own frontier check and confirmation
-- If the user rejects the breakdown or wants to change the order, revise the tickets before calling `implement`
+- After confirmation, call the Skill tool with `implement` for exactly one frontier ticket

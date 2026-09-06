@@ -5,6 +5,15 @@ description: "Implement one approved spec or ticket through TDD, checks, and one
 
 Implement one approved ticket or spec. Do not use this skill to settle an unresolved idea or raw conversation; send that work back to `to-spec` or `to-tickets` first.
 
+Before changing the code, verify all of the following in the current conversation or the referenced tracker artifact:
+
+- The spec or ticket is identifiable
+- Its scope and acceptance criteria are settled
+- The seams to test are recorded
+- The current frontier ticket has an explicit implementation approval
+
+If any item is missing, stop without modifying the code and return control to `to-spec` or `to-tickets`. Do not infer implementation approval from a general request to work on the project
+
 Capture the current `HEAD` as the fixed point before making changes and pass it to the final review
 
 Call the Skill tool with "tdd" and implement at pre-agreed seams. The nested TDD run may contain a review handoff for standalone use, but `implement` owns this run's final review: ignore the nested `code-review` step and do not execute it.
