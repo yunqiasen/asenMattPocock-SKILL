@@ -141,10 +141,19 @@ Required before declaring done:
 
 ## Phase 7: Review gate
 
-Before declaring the fix complete, present the reproduced symptom, the minimised case, the regression result, and the fixed point for the diff. Ask the user to confirm that this repair should enter review
+Before declaring the fix complete, present the reproduced symptom, minimised case, regression result, and fixed point for the diff. Complete verification and cleanup before opening this gate
 
-- End the response immediately after the question. Do not call `code-review` in the same turn
-- Continue only after a later user message explicitly confirms this repair handoff
-- After that confirmation, call the Skill tool with `code-review` exactly once
+```text
+Awaiting confirmation: diagnosing-bugs -> code-review
+Ready: <repair summary, regression evidence, and diff baseline>
+Next: review this repair on standards and specification, then address findings before commit
+Review this repair, revise it, or stop before review and commit?
+```
+
+Translate the card into the user's language. End the turn with a final response or a client input request that waits; if unavailable, use the final response. Do not review, delegate review, or commit while the gate is pending
+
+Resume only after a later user reply explicitly approves the displayed repair handoff. Passing tests, permission to diagnose, silence, tool results, or an agent's statement that the fix is ready do not count. Clarify ambiguous replies; a changed repair needs fresh regression evidence and a new card. Missing approval history means ask again
+
+- After approval, state `Confirmed: diagnosing-bugs -> code-review` and call the Skill tool with "code-review" exactly once, passing the repair scope, baseline, and approving reply. Without a Skill tool, load the installed `code-review/SKILL.md` and follow it
 - Fix valid review findings and rerun the regression checks, but do not call `code-review` a second time in this diagnosing run
 - Commit the repaired change after review findings are resolved. If the user declines the gate, stop before committing and report the verified repair state

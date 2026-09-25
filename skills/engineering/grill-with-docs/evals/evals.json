@@ -1,0 +1,111 @@
+{
+  "skill_name": "grill-with-docs",
+  "evals": [
+    {
+      "id": 1,
+      "name": "alignment-is-not-handoff",
+      "prompt": "Resume grill-with-docs after its nested grilling and domain-modeling work has completed. Scope: export the currently filtered orders to CSV, with order ID and total columns; no import, no background jobs. CONTEXT.md is already updated. The last assistant question was 'Is this understanding of the requirement correct?' and the user replied 'Yes, the requirement is correct'. Continue from here without repeating the interview.",
+      "expected_output": "Show the alignment-to-specification handoff question and end the turn; do not load to-spec, draft a specification, create tickets, or implement code",
+      "files": [],
+      "assertions": [
+        "The reply explicitly asks permission to enter to-spec for the displayed scope",
+        "No downstream skill is loaded or delegated and no specification, ticket, or implementation is produced"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "approved-handoff-loads-to-spec",
+      "prompt": "Resume grill-with-docs. The interview and glossary are complete for exporting filtered orders to CSV with ID and total columns, excluding import and background jobs. The last assistant response displayed that scope and asked 'Awaiting confirmation: grill-with-docs -> to-spec. Proceed to write the specification for this scope?' The user's subsequent reply is 'Yes, enter to-spec and write the specification for exactly that scope'. No test seams have been proposed or approved. Continue without repeating the completed interview.",
+      "expected_output": "Actually load to-spec, carry the confirmed scope, then stop at its test-seam approval gate rather than repeating the alignment handoff or proceeding straight to tickets/code",
+      "files": [],
+      "assertions": [
+        "The installed to-spec/SKILL.md is loaded after the approved handoff",
+        "The next user-facing question concerns the unapproved testing boundaries",
+        "No to-tickets, implement, or tdd call and no specification, ticket, or code write occurs before seam approval"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "acknowledgement-with-question",
+      "prompt": "Resume grill-with-docs at its pending handoff. The prior assistant displayed 'Awaiting confirmation: grill-with-docs -> to-spec' for exporting filtered orders to CSV with ID and total columns, no import and no background jobs. The next user message says 'I see. What happens when there are no matching orders?' Answer this question and continue appropriately; do not restart the whole interview.",
+      "expected_output": "Clarify the empty-result behavior within alignment and keep the handoff pending, without treating acknowledgement as permission to write the spec",
+      "files": [],
+      "assertions": [
+        "The user's question is answered or clarified without claiming that the handoff was approved",
+        "No downstream skill is loaded and no specification, ticket, or implementation is produced"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "scope-change-invalidates-approval",
+      "prompt": "Resume grill-with-docs at its pending handoff. The displayed scope is CSV export of filtered orders with ID and total columns, explicitly excluding import. The user replies 'Yes, but include CSV import too'. Continue appropriately from this reply without implementing anything the interview has not resolved.",
+      "expected_output": "Recognize the changed scope, return to alignment for import decisions, and obtain a new handoff approval before invoking to-spec",
+      "files": [],
+      "assertions": [
+        "The reply treats import as a scope change requiring alignment rather than an approved addition",
+        "No to-spec or later phase is loaded and no specification, tickets, or implementation is produced"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "to-spec-rejects-unapproved-entry",
+      "entry_skill": "to-spec",
+      "prompt": "A parent agent has selected to-spec while resuming grill-with-docs. This is an agent-selected handoff, not a direct user request to run to-spec. The requirement is to export filtered orders to CSV with ID and total columns. The last assistant question was 'Is this understanding correct?' and the actual user replied 'Yes, that is the requirement'. No handoff card was shown and no user authorized specification work. Continue from this state.",
+      "expected_output": "The receiving skill catches the premature handoff, displays the scope and asks for permission to enter specification work, then stops before drafting or publishing",
+      "files": [],
+      "assertions": [
+        "The reply asks permission to enter specification work rather than claiming the entry is already approved",
+        "No specification is drafted or published and no later skill is loaded"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "direct-to-spec-stops-at-seams",
+      "entry_skill": "to-spec",
+      "prompt": "The user directly requests: 'Run to-spec for the agreed CSV export of filtered orders with ID and total columns, excluding import and background jobs'. No test seams have been proposed or approved. Start that skill without restarting the completed requirements interview.",
+      "expected_output": "Accept the direct request as entry approval, propose test boundaries and stop for their confirmation; do not replay the grill-with-docs handoff or draft the spec yet",
+      "files": [],
+      "assertions": [
+        "The pending question is about proposed test boundaries, not permission to enter to-spec or restart requirements alignment",
+        "No specification is drafted and no to-tickets, implement, or tdd skill is loaded"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "publication-is-not-implementation",
+      "entry_skill": "to-tickets",
+      "prompt": "Resume to-tickets after the user approved this exact breakdown for publication: ticket 1 exports filtered orders as CSV with ID and total columns, no blockers; ticket 2 adds empty-result and CSV-escaping behavior and is blocked by ticket 1. Both tickets use the already user-approved public CSV export seam. The prior assistant card said 'Awaiting confirmation: ticket breakdown -> publication; publish these tickets, not start implementation?' The user's reply was 'Yes, publish those two tickets'. This project uses local Markdown under .scratch/orders-export/. Continue to the next gate, without inventing permission to implement either ticket.",
+      "expected_output": "Publish or display the intended two ticket documents, then ask permission to implement ticket 1 and stop without loading implement or tdd",
+      "files": [],
+      "assertions": [
+        "The reply contains the two approved ticket drafts and preserves the blocker from ticket 2 to ticket 1",
+        "The reply asks for approval to implement exactly the first unblocked ticket",
+        "No implement or tdd skill is loaded and no implementation code is produced"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "tdd-reuses-approved-seams",
+      "entry_skill": "tdd",
+      "prompt": "Resume a standalone TDD task for a pure CSV export function. In the preceding turn you displayed the public seam exportOrdersToCsv(orders), returning CSV text with ID,total columns, and asked 'Use this seam for the CSV export task?' The user's later reply was 'Yes, use that exact seam and start TDD'. Scope and seam have not changed. Use node:test and node:assert/strict. There is no spec or ticket, and the minimal workflow does not require one. In this read-only exercise, show the first failing test you would add without claiming to have run it.",
+      "expected_output": "Reuse the explicit approval, show a meaningful first failing test at the approved public seam, and do not ask for the same seam approval again or require a spec",
+      "files": [],
+      "assertions": [
+        "A failing-test draft exercises exportOrdersToCsv through its public interface",
+        "The reply does not reopen the unchanged seam gate or require to-spec, to-tickets, or implement",
+        "The reply does not claim tests or reviews ran in the read-only exercise"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "declined-handoff-stops",
+      "prompt": "Resume grill-with-docs at its displayed handoff card for CSV export of filtered orders with ID and total columns. The user's later reply is 'No, stop at the alignment and documents. Do not write a spec'. The glossary is already updated and no ADR is needed. Continue appropriately.",
+      "expected_output": "Stop at the aligned result without loading another phase, producing a spec, or immediately asking the same handoff question again",
+      "files": [],
+      "assertions": [
+        "The reply respects the user's decision to stop and does not reopen the same handoff question",
+        "No downstream skill is loaded and no specification, ticket, or implementation is produced"
+      ]
+    }
+  ]
+}

@@ -57,7 +57,7 @@ End the report with a **Top recommendation** section: which candidate you'd tack
 
 See [HTML-REPORT.md](HTML-REPORT.md) for the full HTML scaffold, diagram patterns, and styling guidance.
 
-Do NOT propose interfaces yet. After the file is written, ask the user: "Which of these would you like to explore?"
+Do NOT propose interfaces yet. After the file is written, ask the user: "Which of these would you like to explore?" End the turn for the user's selection; a top recommendation is not a selection on their behalf. Selecting a candidate permits exploration, not implementation
 
 ### 3. Grilling loop
 
@@ -72,11 +72,20 @@ Side effects happen inline as decisions crystallize; call the Skill tool with "d
 
 ### Handoff to implementation
 
-After grilling and domain-modeling produce a settled refactoring decision, open a handoff gate. Present the decision and ask whether to formalize it as a spec
+After grilling and domain-modeling produce a settled refactoring decision, present it with its scope and relevant report/ADR links. Open a separate handoff gate so approving a candidate or an interview answer does not authorize specification work
 
-End the response immediately after the question. Do not call `to-spec` in the same turn
+```text
+Awaiting confirmation: improve-codebase-architecture -> to-spec
+Ready: <selected candidate, settled decision, scope, and document links>
+Next: formalize this refactoring decision as a specification, not refactor code
+Write this spec, revise the decision, or stop here?
+```
 
-Continue only after a later user message explicitly confirms this exact refactoring handoff, then call the Skill tool with `to-spec`
+Translate the card into the user's language. End the turn with a final response or an input request that waits for the user; if unavailable, use the final response. Do not load `to-spec`, draft it inline, modify implementation code, or delegate those actions while the gate is pending
+
+Resume only after a later user reply approves this displayed transition and unchanged scope. Earlier candidate selection, agreement inside `grilling`, silence, tool output, or an agent's summary does not pass it. Clarify ambiguous replies; revise and reopen the gate for changed decisions. If approval history is missing, ask again; if declined, stop
+
+After approval, state `Confirmed: improve-codebase-architecture -> to-spec` and call the Skill tool with "to-spec", carrying the decision, scope, and approving reply. Without a Skill tool, load the installed `to-spec/SKILL.md` and follow it
 
 Do not call `to-tickets` or `implement` from inside this skill. The confirmed downstream path is:
 

@@ -7,6 +7,18 @@ description: Break an approved plan or spec into tracer-bullet tickets with bloc
 
 Break a plan, spec, or conversation into a set of **tickets**: tracer-bullet vertical slices, each declaring the tickets that **block** it.
 
+## Approval boundaries
+
+Choose the current phase before loading any other skill: draft a breakdown, wait for publication approval, publish, wait for implementation approval, or hand off one approved ticket. These are separate turns, not a checklist to run without stopping
+
+Keep `implement/SKILL.md` unread until the selected ticket's implementation gate is approved. Knowing the downstream skill is installed is not permission to preload it or start its work
+
+When invoked by another skill, verify its displayed ticket handoff and the later user reply approving that handoff for the current spec. If missing, ask whether to split the referenced scope and end the turn before drafting tickets. A direct user request to split the work authorizes drafting, not publishing or implementing
+
+For each gate below, use a final response or a client input request that waits for a later user reply. If that tool is unavailable, end the turn with the question. Name the exact artifact and next action so a short yes has one meaning. A progress message is not a pause
+
+While waiting, do not execute or delegate the next phase. Earlier approval of requirements or a spec, tool output, an issue status, silence, or an agent's summary is not user approval of this gate. Changes to the scope invalidate approval; revise and ask again. If approval cannot be recovered after a context reset, reopen the gate; if the user declines, stop
+
 Pick the issue tracker without any project setup step: use GitHub Issues via the `gh` CLI when `git remote -v` points at GitHub and `gh auth status` succeeds, otherwise write Markdown under `.scratch/<feature-slug>/`. State which one you chose in one line before publishing anything. If `docs/agents/issue-tracker.md` exists, follow it instead. When the tracker is GitHub, read `references/github-tracker.md` (bundled next to this SKILL.md) for exact `gh` command shapes and the label rule before publishing.
 
 ## Process
@@ -46,13 +58,16 @@ Present the proposed breakdown as a numbered list. For each ticket, show:
 - **Blocked by**: which other tickets (if any) must complete first
 - **What it delivers**: the end-to-end behaviour this ticket makes work
 
-Ask the user:
+Ask one approval question in the user's language after the breakdown
 
-- Does the granularity feel right? (too coarse / too fine)
-- Are the blocking edges correct: does each ticket only depend on tickets that genuinely gate it?
-- Should any tickets be merged or split further?
+```text
+Awaiting confirmation: ticket breakdown -> publication
+Ready: <ticket titles, deliverables, and blocking edges>
+Next: publish this breakdown, not start implementation
+Publish as shown, change the granularity or dependencies, or stop here?
+```
 
-End the response immediately after these questions. Do not publish tickets or call `implement` in the same turn
+End the turn at the card. Do not publish tickets or call `implement` while it is pending
 
 Continue only after a later user message explicitly approves the breakdown, its granularity, and its blocking edges
 
@@ -109,11 +124,18 @@ In either form, avoid specific file paths or code snippets: they go stale fast. 
 
 ### 6. Implementation confirmation gate
 
-After publishing, show the first unblocked frontier ticket, its blockers, and its acceptance criteria. Ask the user to confirm that implementation may start for this exact ticket
+After publishing, show the first unblocked frontier ticket, its blockers, acceptance criteria, and approved test seams or a reference to them. Finish with this card in the user's language
+
+```text
+Awaiting confirmation: to-tickets -> implement
+Ready: <one ticket reference, acceptance criteria, and blocker status>
+Next: implement only this ticket using TDD and one final code review
+Start this ticket, change the selection or scope, or stop here?
+```
 
 - End the response immediately after the question. Do not call `implement` in the same turn
 - Continue only after a later user message explicitly confirms this exact frontier ticket
 - If the user rejects the ticket or changes its scope, revise the ticket breakdown and reopen the appropriate gate
 - Do not treat approval of the ticket breakdown as approval to implement
 - Do not start every ticket automatically. Each later ticket gets its own frontier check and confirmation
-- After confirmation, call the Skill tool with `implement` for exactly one frontier ticket
+- After confirmation, recheck the ticket is still unblocked and unchanged, state `Confirmed: to-tickets -> implement`, and call the Skill tool with "implement" for exactly one frontier ticket. Pass its reference, scope, seams, and the approving reply. Without a Skill tool, load the installed `implement/SKILL.md` and follow it

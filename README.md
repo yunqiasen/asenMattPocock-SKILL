@@ -208,7 +208,7 @@ $ASEN install --list             # 15 个 Skill 的调用模式和依赖
 $ASEN check                      # 校验 manifest 与每个 SKILL.md 的真实调用是否一致
 ```
 
-`check` 会逐个比对 `SKILL.md` 里的 `Call the Skill tool with "name"` 与 `manifest.json` 的 `dependsOn`，同时检查调用模式在 `SKILL.md` 和 `agents/openai.yaml` 之间是否一致。修改任何 Skill 的内部调用后都应先跑它。
+`check` 会双向比对 `SKILL.md` 里的 `Call the Skill tool with "name"` 与 `manifest.json` 的 `dependsOn`：漏写安装依赖、漏写调用语句都会报错，支持双引号、单引号和反引号。同时检查调用模式在 `SKILL.md` 和 `agents/openai.yaml` 之间是否一致。它是静态检查，不证明 AI 实际执行了确认门。
 
 正式安装前会打印 `Installing: ...` 和 `Bundled skills included: ...`，便于确认没有多装或漏装。
 
@@ -284,6 +284,33 @@ Claude Code 对应目录是 `.claude/skills`。
 | 6 | **研究后开发** | 技术、库、SDK 或方案不熟悉，需要先查清楚再开发 | ① `research` → 生成 `research/*.md`<br>② **停止并提示用户手动启动** `grill-with-docs`（不是 `research` 内部调用）<br>③ `grill-with-docs`（内部调用：`grilling` + `domain-modeling`）<br>④ 【确认门】确认对齐结果<br>⑤ `to-spec`（`grill-with-docs` 内部调用）<br>⑥ 【确认门】确认 spec<br>⑦ `to-tickets`（`to-spec` 内部调用）<br>⑧ 【确认门】确认 frontier Ticket<br>⑨ `implement`（`to-tickets` 内部调用）<br>⑩ `tdd`（`implement` 内部调用）<br>⑪ `code-review`（`implement` 内部调用） | 调研结果进入标准开发链；不让研究 Skill 越过人工规划门 |
 
 上表中每个 Skill 都是运行时硬依赖，没有可选项。`tdd -> codebase-design -> prototype` 这条链让 `codebase-design` 和 `prototype` 进入除 Bug 调试外的所有工作流；`wayfinder` 另外直接依赖 `research` 和 `prototype`。
+
+### 确认门如何工作
+
+确认门是 Skill 内的交互指令，不是安装器或客户端提供的程序锁。Agent 先判断当前阶段，再显示“待确认：当前阶段 -> 下一阶段”，列出范围、产物和下一步，然后结束本轮，等待你回复；不能一边说“请确认”一边继续做，也不能提前读取下一阶段的 Skill。
+
+```text
+展示当前结果和下一步 -> 等待你的回复
+                      ├─ 明确同意当前交接 -> 加载下一个 Skill
+                      ├─ 提问或含糊回复   -> 澄清，继续等待
+                      └─ 修改范围         -> 更新结果，重新确认
+```
+
+| 所在 Skill | 等待你确认的内容 | 确认后执行 |
+|---|---|---|
+| `grilling` | 需求理解及下一步 | 嵌套时只返回调用方；顶层代码任务进入 `tdd`，非代码任务直接执行 |
+| `grill-with-docs` | 是否把当前对齐结果写成规格 | 显式调用 `to-spec`；对 `grilling` 的回答不代替这次交接确认 |
+| `to-spec` | 测试边界；完成的 spec 是否可以拆任务 | 先写规格，再经独立确认调用 `to-tickets` |
+| `to-tickets` | 拆分及阻塞关系是否可发布；是否开工指定 Ticket | 先发布，再经独立确认调用 `implement`，一次只做一个 Ticket |
+| `wayfinder` | 决策 Ticket 和未知项已解决后，是否写规格 | 调用 `to-spec`；只有 frontier 为空不代表地图完成 |
+| `improve-codebase-architecture` | 报告候选选择；重构决策是否写成规格 | 先探索所选候选，再经交接确认调用 `to-spec` |
+| `diagnosing-bugs` | 已验证的修复是否进入审查 | 调用一次 `code-review`，处理有效意见后提交 |
+| `implement` | 指定规格或 Ticket 是否已有开工批准 | 校验上游批准后执行；只缺批准时停下来询问，不把 ready 状态当许可 |
+| `tdd` | 尚未批准的测试边界 | 开始红绿重构；沿用相同范围的已有批准，不重复询问 |
+
+`to-spec`、`to-tickets`、`implement` 还会检查上一步交接和用户批准是否存在。直接指定某个 Skill 可启动该阶段，但不授权它越过后续确认门。旧的“开始开发”、工具输出、Issue 的 ready 状态或 Agent 自称已批准，都不能代替当前交接确认；范围改变后要重新确认。
+
+调用下一 Skill 时，有 Skill 工具就使用它；没有时读取已安装的对应 `SKILL.md` 并执行，不能只在回复中提到名字。仓库修改或 push 不会自动更新各项目已安装的副本，使用新规则前需更新对应安装目录。
 
 ## 运行时调用规则
 
@@ -406,9 +433,10 @@ git merge main
 ### 4. 移植后验证
 
 ```bash
-scripts/check-manifest.mjs
+node scripts/check-manifest.mjs
 scripts/install-skills.sh --list
 scripts/install-skills.sh --list-workflows
+node --test scripts/check-manifest.test.mjs
 git diff --check
 ```
 
@@ -435,6 +463,7 @@ asenMattPocock-SKILL/
 │   └── cli.mjs                            # asen-skills 命令入口：install / list / check
 ├── scripts/
 │   ├── check-manifest.mjs                 # 校验 manifest 与 SKILL.md 真实调用是否一致
+│   ├── check-manifest.test.mjs            # 调用声明及依赖校验的回归测试
 │   ├── install-skills.sh                  # Claude/Codex 项目级与全局安装入口
 │   ├── list-skills.sh                     # 列出仓库内所有 SKILL.md
 │   └── resolve-skills.mjs                 # 根据 manifest 展开安装依赖
@@ -447,6 +476,7 @@ asenMattPocock-SKILL/
     │   ├── diagnosing-bugs/               # 系统化 Bug 调试
     │   ├── domain-modeling/                # 领域模型和项目语境维护
     │   ├── grill-with-docs/                # 绑定代码库的需求拷问
+    │   │   └── evals/evals.json           # 确认门和下游交接的行为测试场景
     │   ├── implement/                     # 规格或 Ticket 实现
     │   ├── improve-codebase-architecture/ # 架构扫描和重构决策
     │   ├── prototype/                     # 逻辑和 UI 原型
@@ -457,7 +487,7 @@ asenMattPocock-SKILL/
     │   ├── to-tickets/                    # 规格转垂直切片 Ticket
     │   │   └── references/github-tracker.md
     │   └── wayfinder/                     # 模糊大任务探索地图
-        └── references/github-tracker.md
+    │       └── references/github-tracker.md
     └── productivity/                      # 通用生产力 Skill
         └── grilling/                      # 通用拷问与最小工作流入口
 ```

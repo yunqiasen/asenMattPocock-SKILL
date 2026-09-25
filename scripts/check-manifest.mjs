@@ -6,11 +6,11 @@ const manifestPath = process.argv[2] ?? "skills/manifest.json";
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 const problems = [];
 
-const CALL_PATTERN = /Skill tool (?:twice, )?(?:with|for) "([a-z-]+)"(?: and "([a-z-]+)")?/g;
+const CALL_PATTERN = /Skill tool\s+(?:twice,\s*)?(?:with|for)\s+(["'`])([a-z][a-z0-9-]*)\1(?:\s+and\s+(["'`])([a-z][a-z0-9-]*)\3)?/gi;
 
 function callsIn(body) {
   return new Set(
-    [...body.matchAll(CALL_PATTERN)].flatMap(match => [match[1], match[2]]).filter(Boolean),
+    [...body.matchAll(CALL_PATTERN)].flatMap(match => [match[2], match[4]]).filter(Boolean),
   );
 }
 
@@ -36,12 +36,20 @@ for (const [name, meta] of Object.entries(manifest.skills)) {
   const file = `skills/${meta.bucket}/${name}/SKILL.md`;
   if (!existsSync(file)) continue;
   const declared = new Set(meta.dependsOn);
-  for (const call of callsIn(readFileSync(file, "utf8"))) {
+  const calls = callsIn(readFileSync(file, "utf8"));
+  for (const call of calls) {
     if (call === name) continue;
     if (!manifest.skills[call]) {
       problems.push(`${name} calls "${call}" which is not in the manifest`);
     } else if (!declared.has(call)) {
       problems.push(`${name} calls "${call}" but dependsOn is missing it`);
+    }
+  }
+  for (const dependency of declared) {
+    if (!manifest.skills[dependency]) {
+      problems.push(`${name} dependsOn "${dependency}" which is not in the manifest`);
+    } else if (!calls.has(dependency)) {
+      problems.push(`${name} dependsOn "${dependency}" but no explicit call exists in SKILL.md`);
     }
   }
 

@@ -129,11 +129,24 @@ The user may run unblocked tickets in parallel, so expect other sessions to be e
 
 ### Handoff after the map
 
-When the map has no open frontier tickets and no unresolved fog, stop planning. Present the destination and the linked decisions, then open a handoff gate asking whether to collapse the map into an implementation spec
+When the map has no unresolved in-scope decision tickets and no unresolved fog, stop planning. An empty frontier alone does not mean the map is done: blocked or claimed open tickets still need resolution. Present the destination, scope, and linked decisions before asking for the handoff
 
-End the response immediately after the question. Do not call `to-spec` in the same turn
+```text
+Awaiting confirmation: wayfinder -> to-spec
+Ready: <map reference, destination, and settled decisions>
+Next: turn this map into a specification, not implement its decision tickets
+Write this spec, revise the map, or stop here?
+```
 
-Continue only after a later user message explicitly confirms this handoff, then call the Skill tool with `to-spec`. Do not call `to-tickets` or `implement` from inside wayfinder. Those remain downstream confirmation-gated phases. The next path is:
+Translate the card into the user's language. End the turn with a final response or a client input request that waits; if unavailable, use the final response. Do not load `to-spec`, draft it inline, or delegate it while the gate is pending
+
+Resume only after a later user reply approves this displayed transition for the unchanged map. Resolving a decision ticket, agreeing inside `grilling`, a map note, a tool result, or earlier permission to investigate is not approval to write a spec
+
+If the user asks a question or gives an ambiguous reply, clarify and repeat the card. If the destination or decisions change, update the map and reopen the gate when it is ready. Missing approval history means ask again; a decline means stop
+
+After approval, state `Confirmed: wayfinder -> to-spec` and call the Skill tool with "to-spec", passing the map, decisions, and the approving reply. Without a Skill tool, load the installed `to-spec/SKILL.md` and follow it
+
+Do not call `to-tickets` or `implement` from inside wayfinder. Those remain downstream confirmation-gated phases. The next path is:
 
 ```text
 /to-spec -> confirmation -> to-tickets -> confirmation -> implement

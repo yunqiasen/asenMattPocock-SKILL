@@ -19,21 +19,24 @@ See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking g
 
 A **seam** is the public boundary you test at: the interface where you observe behavior without reaching inside. Tests live at seams, never against internals.
 
-**Test only at pre-agreed seams.** Before writing any test, write down the seams under test and confirm them with the user. No test is written at an unconfirmed seam. You can't test everything, so agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
-
-Ask: "What's the public interface, and which seams should we test?"
-
-When the seams are not already approved by the originating spec or ticket, open a seam confirmation gate
-
-1. Show the proposed seams and the behavior each seam observes
-2. Ask the user to confirm them
-3. End the response immediately after the question. Do not write a test or production code in that turn
-4. Continue only after a later user message explicitly confirms the seams
-5. If the user changes a seam, update the plan and reopen the gate
-
-When `implement` passes seams from an approved spec or ticket, treat those seams as already confirmed and do not ask for a duplicate gate
+**Test only at pre-agreed seams.** First identify the seams, scope, and their approval source in the conversation or referenced spec/ticket. Reuse explicit user approval for the same unchanged seams, including approval passed by `implement`, without asking again. A seam listed in a document or proposed by an agent is not approval by itself
 
 When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose), call the Skill tool with "codebase-design" for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
+
+When approval is missing, show the proposed public interfaces and the behavior each test will observe. Agreeing these boundaries before coding keeps testing focused on the important behavior rather than every implementation detail
+
+```text
+Awaiting confirmation: test seams -> TDD
+Ready: <seams, behaviors, and scope>
+Next: write the first failing test, then implement at these seams
+Use these seams, revise them, or stop here?
+```
+
+Translate the card into the user's language. Use a final response or an input request that waits for the user; if unavailable, end the turn with the card. Do not write tests or production code, including via a subagent, while the gate is pending
+
+Resume only after a later user reply explicitly approves the displayed seams. An earlier "fix this", silence, a tool result, or agreement to a different phase is not approval. Clarify an ambiguous answer; revise and ask again if the seams or scope change. Missing approval history means reopen this gate
+
+After approval, state which seams were confirmed and start the loop. This is not a new spec requirement for the minimal workflow, and it adds no extra confirmation before the final review
 
 ## Anti-patterns
 

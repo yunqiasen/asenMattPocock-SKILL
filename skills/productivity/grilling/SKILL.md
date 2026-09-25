@@ -29,20 +29,25 @@ The session is done when the frontier is empty: every branch of the design tree 
 
 ## Confirmation gate
 
-When the frontier is empty, present the shared understanding and open a confirmation gate
+When the frontier is empty, show the decisions, scope, and remaining assumptions. Name the next action before asking so agreement with an interview answer cannot silently authorize execution
 
-1. Show the decisions reached, the remaining assumptions, and the proposed handoff
-2. Ask whether the shared understanding is correct
-3. End the response immediately after the question. Do not make changes or call a downstream Skill in that turn
-4. Continue only after a later user message explicitly confirms this shared understanding
-5. Treat a correction, new requirement, or ambiguous acknowledgement as a revision, not as confirmation; update the decision tree and reopen the gate
+```text
+Awaiting confirmation: shared understanding -> <next action>
+Ready: <decisions and scope>
+Next: <return to the caller, start TDD for this code task, or execute this non-code task>
+Confirm this understanding and next action, revise it, or stop here?
+```
 
-Do not treat confirmation of an earlier phase as confirmation of this gate
+Translate the card into the user's language. End the turn using a final response or an input request that waits for the user. If that tool is unavailable, use the final response. A progress message followed by further work is not a pause
+
+Resume only after a later user reply explicitly approves that card. Earlier answers, a generic request to build something, silence, tool results, and an agent's own summary do not pass it. Questions or ambiguous replies stay in alignment; a correction or new requirement invalidates the old approval and needs a revised card
+
+When nested, confirmation returns the alignment to the caller only. It does not pass the caller's separate handoff gate, particularly `grill-with-docs -> to-spec`. If the conversation no longer contains the approval, ask again rather than invent it
 
 ## Execution handoff
 
 After the user confirms the shared understanding in a later turn, choose the handoff by invocation mode
 
-- When `grilling` is the top-level workflow for a small, clear task, execute the agreed task. For a code change, call the Skill tool with "tdd"; the standalone TDD run owns the final `code-review`
+- When `grilling` is the top-level workflow for a small, clear task, execute the agreed task. For a code change, call the Skill tool with "tdd"; the standalone TDD run owns the final `code-review`. Without a Skill tool, load the installed `tdd/SKILL.md` and follow it
 - When another skill called `grilling`, stop at shared understanding and return control to that caller. Do not start `tdd` from a nested grilling run
 - For a non-code task, execute the agreed writing, planning, or decision work directly without `tdd`
