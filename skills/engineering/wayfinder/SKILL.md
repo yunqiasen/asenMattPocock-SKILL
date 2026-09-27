@@ -24,6 +24,8 @@ The map is an **index**, not a store. It lists the decisions made and points at 
 
 **Where the map, its child tickets, blocking, and frontier queries physically live is tracker-specific.** Pick the issue tracker without any project setup step: use GitHub Issues via the `gh` CLI when `git remote -v` points at GitHub and `gh auth status` succeeds, otherwise write Markdown under `.scratch/<feature-slug>/`. State which one you chose in one line before publishing anything. If `docs/agents/issue-tracker.md` exists, follow it instead. When the tracker is GitHub, read `references/github-tracker.md` (bundled next to this SKILL.md) for exact `gh` command shapes and the label rule before publishing. With the local Markdown tracker the map is `.scratch/<effort>/map.md`, each ticket is one file under `.scratch/<effort>/issues/`, blocking is a `Blocked by: NN, NN` line near the top of a ticket, and a ticket is unblocked when every listed ticket is resolved.
 
+Keep established document locations, including shared workspace folders. Before creating or resuming a local map, search by project and effort name and reuse its directory and tickets. For a new shared directory, use `<project>-<effort>`, e.g. `.scratch/shop-checkout/map.md`, unless the parent already identifies the project. Keep `map.md` and `issues/` unchanged, and pass actual document paths to helpers and the handoff
+
 ### The map body
 
 The whole map at low resolution, loaded once per session. Open tickets are **not** listed: they are open child issues, found by query.

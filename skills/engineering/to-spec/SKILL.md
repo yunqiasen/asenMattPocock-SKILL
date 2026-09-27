@@ -26,6 +26,8 @@ Accept a later clear affirmative reply to that gate, not an earlier "build it", 
 
 Pick the issue tracker without any project setup step: use GitHub Issues via the `gh` CLI when `git remote -v` points at GitHub and `gh auth status` succeeds, otherwise write Markdown under `.scratch/<feature-slug>/`. State which one you chose in one line before publishing anything. If `docs/agents/issue-tracker.md` exists, follow it instead. When the tracker is GitHub, read `references/github-tracker.md` (bundled next to this SKILL.md) for exact `gh` command shapes and the label rule before publishing.
 
+For local documents, keep established locations, including shared workspace folders. Search by project and task name before writing and reuse matching files and task directories in place. For a new shared path, use `<project>-<task>` as the feature slug, e.g. `.scratch/shop-checkout/spec.md`, unless its parent already identifies the project. Keep actual document paths in the handoff so the next skill can reuse them
+
 ## Process
 
 Synthesize the agreed context rather than restarting the requirements interview. Ask only the approval questions needed for the current phase

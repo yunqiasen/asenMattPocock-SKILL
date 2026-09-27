@@ -26,6 +26,8 @@ Pass that this is a nested call: `grilling` returns the shared understanding to 
 
 Update `CONTEXT.md` and relevant ADRs as decisions settle, following `domain-modeling`. Finish those updates before asking for the handoff so the user can review the actual result
 
+Find this project's existing documents by project name and topic before writing, and reuse their locations, including shared folders. Follow `domain-modeling` for project-distinguishing names without renaming fixed files, and carry the actual document paths into the handoff
+
 ## Confirmation gate: alignment -> specification
 
 Treat agreement with the requirements and permission to write a spec as separate decisions. A reply to a grilling question approves that answer, not the next workflow phase

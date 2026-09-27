@@ -5,6 +5,8 @@ description: "Implement one approved spec or ticket through TDD, checks, and one
 
 Implement one approved ticket or spec. Do not use this skill to settle an unresolved idea or raw conversation; send that work back to `to-spec` or `to-tickets` first.
 
+Use the document paths passed in the handoff. If a path was lost, search established document locations, including shared folders, by project and task name and read the matching spec or ticket in place. Finding the file does not restore missing user approval
+
 Before changing the code, verify all of the following in the current conversation or the referenced tracker artifact:
 
 - The spec or ticket is identifiable

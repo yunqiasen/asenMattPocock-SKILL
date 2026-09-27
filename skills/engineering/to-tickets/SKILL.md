@@ -21,6 +21,8 @@ While waiting, do not execute or delegate the next phase. Earlier approval of re
 
 Pick the issue tracker without any project setup step: use GitHub Issues via the `gh` CLI when `git remote -v` points at GitHub and `gh auth status` succeeds, otherwise write Markdown under `.scratch/<feature-slug>/`. State which one you chose in one line before publishing anything. If `docs/agents/issue-tracker.md` exists, follow it instead. When the tracker is GitHub, read `references/github-tracker.md` (bundled next to this SKILL.md) for exact `gh` command shapes and the label rule before publishing.
 
+For local documents, search established locations, including shared folders, by project and task name. Reuse matching tickets and any existing task-specific directory; preserve paths and ticket numbers on resume. For a new shared task directory, use `<project>-<task>` as the feature slug unless its parent already identifies the project, e.g. `.scratch/shop-checkout/issues/01-place-order.md`. Pass the actual spec and ticket paths into the handoff
+
 ## Process
 
 ### 1. Gather context

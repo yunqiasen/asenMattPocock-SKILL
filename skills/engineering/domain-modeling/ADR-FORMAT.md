@@ -1,8 +1,10 @@
 # ADR Format
 
-ADRs live in `docs/adr/` and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
+ADRs use the established ADR directory (`docs/adr/` by default) and sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
 
-Create the `docs/adr/` directory lazily: only when the first ADR is needed.
+Before writing, search for this project's decision by project name and topic and reuse it in place. For a new ADR in a directory shared by projects, include the project name in the slug, e.g. `0003-shop-checkout.md`; skip that prefix if the parent path already identifies the project
+
+Create the ADR directory lazily: only when the first ADR is needed.
 
 ## Template
 
@@ -24,7 +26,7 @@ Only include these when they add genuine value. Most ADRs won't need them.
 
 ## Numbering
 
-Scan `docs/adr/` for the highest existing number and increment by one.
+Scan the selected ADR directory for the highest existing number and increment by one. If projects share that directory, use its single sequence rather than restarting per project; preserve existing filenames and numbers
 
 ## When to offer an ADR
 

@@ -31,7 +31,7 @@ _Avoid_: Client, buyer, account
 
 ## Single vs multi-context repos
 
-**Single context (most repos):** One `CONTEXT.md` at the repo root.
+**Single context (most repos):** One `CONTEXT.md`, at the repo root by default. Reuse an established location instead, including a shared folder such as `docs/shop/CONTEXT.md`; keep the filename unchanged
 
 **Multiple contexts:** A `CONTEXT-MAP.md` at the repo root lists the contexts, where they live, and how they relate to each other:
 
@@ -53,8 +53,9 @@ _Avoid_: Client, buyer, account
 
 The skill infers which structure applies:
 
-- If `CONTEXT-MAP.md` exists, read it to find contexts
-- If only a root `CONTEXT.md` exists, single context
-- If neither exists, create a root `CONTEXT.md` lazily when the first term is resolved
+- First find this project's existing documents by project name in the established locations, including shared folders
+- If its `CONTEXT-MAP.md` exists, read it to find contexts
+- If it has only a `CONTEXT.md`, single context
+- If neither exists, create `CONTEXT.md` lazily when the first term is resolved; in a shared document folder, distinguish the project with a parent directory such as `docs/shop/CONTEXT.md`
 
 When multiple contexts exist, infer which one the current topic relates to. If unclear, ask.

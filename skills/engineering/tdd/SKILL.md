@@ -7,7 +7,7 @@ description: Test-driven development through red, green, refactor, and commit. U
 
 TDD is the red → green → refactor → commit loop. This skill makes that loop produce tests worth keeping: what a good test is, where tests go, the anti-patterns, and the rules of each cycle.
 
-When exploring the codebase, read `CONTEXT.md` (if it exists) so test names and interface vocabulary match the project's domain language, and respect ADRs in the area you're touching.
+When exploring the codebase, locate and read this project's `CONTEXT.md` (if it exists) in its established location, including shared folders. Search by project name if its path is missing, so test names and interface vocabulary match the project's domain language, and respect ADRs in the area you're touching
 
 ## What a good test is
 

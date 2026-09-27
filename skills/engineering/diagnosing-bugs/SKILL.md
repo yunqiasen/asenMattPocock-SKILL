@@ -9,6 +9,8 @@ A discipline for hard bugs. Skip phases only when explicitly justified.
 
 When exploring the codebase, read `CONTEXT.md` (if it exists) to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
 
+If saving debugging notes, keep their established location, including shared folders. Search by project and bug/topic before writing and reuse the matching note in place. For new shared notes, include both names in the filename or parent directory, e.g. `.scratch/shop-login-timeout/repro.md`; avoid adding a redundant project prefix
+
 ## Redact
 
 This skill has you show commands, outputs and captured artifacts. **Redact every secret first**: write `<REDACTED>` in its place. Build loops against env vars, so the credential stays in the environment rather than in what you show. Captured artifacts carry auth headers: quote only the lines that carry the signal.

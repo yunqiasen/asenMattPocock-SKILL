@@ -9,6 +9,10 @@ Actively build and sharpen the project's domain model as you design. This is the
 
 ## File structure
 
+Keep established document locations, including shared workspace folders. Before reading or writing, search by project name and topic and reuse that project's existing glossary and ADRs in place
+
+For new documents in a shared location, include the project name in the filename or parent directory unless the path already distinguishes it, e.g. `docs/shop/CONTEXT.md` or `docs/adr/0003-shop-checkout.md`. Keep fixed filenames and ADR numbering unchanged; the layouts below are defaults, not instructions to relocate documents
+
 Most repos have a single context:
 
 ```
