@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 ## Choose the current phase first
 
-Before reading or invoking another skill, locate the latest user reply and the question it answers. Select one row, not a sequence of rows to complete in this turn
+Before reading or invoking another skill, locate the latest user reply and the question it answers. Use the current state below; continue ordinary internal steps until a genuine interview question or the single final handoff gate needs the user
 
 | Conversation state | Next action |
 | --- | --- |
@@ -22,7 +22,7 @@ Load skills only when the selected phase needs them. In particular, leave `to-sp
 
 While alignment needs work, call the Skill tool twice, for "grilling" and "domain-modeling"
 
-Pass that this is a nested call: `grilling` returns the shared understanding to `grill-with-docs`, not permission to start TDD or write a spec. Do not restart a completed interview when resuming its handoff gate
+Pass that this is a nested call: `grilling` returns the shared understanding without a closing confirmation, not permission to start TDD or write a spec. Continue domain-modeling and document updates without asking permission between these steps. Do not restart a completed interview when resuming its handoff gate
 
 Update `CONTEXT.md` and relevant ADRs as decisions settle, following `domain-modeling`. Finish those updates before asking for the handoff so the user can review the actual result
 
@@ -30,7 +30,7 @@ Find this project's existing documents by project name and topic before writing,
 
 ## Confirmation gate: alignment -> specification
 
-Treat agreement with the requirements and permission to write a spec as separate decisions. A reply to a grilling question approves that answer, not the next workflow phase
+Confirm the complete alignment result and permission to write the spec together, once. Do not first ask for approval of the summary and then ask again to continue. An answer to an individual grilling question is not approval of this final plan and next action
 
 1. Present the current decisions, scope, unresolved assumptions, and links to any glossary or ADR updates
 2. End the turn with the following confirmation card, translated into the user's language
@@ -39,7 +39,7 @@ Treat agreement with the requirements and permission to write a spec as separate
 Awaiting confirmation: grill-with-docs -> to-spec
 Ready: <alignment summary and document links>
 Next: write a specification from these decisions, not tickets or code
-Proceed to to-spec with this scope, revise the decisions, or stop here?
+Approve these decisions and write the spec, revise the decisions, or stop here?
 ```
 
 3. Stop after the card. Use a final response or the client's input request that actually waits for the user; a progress message followed by more work is not a pause. If the input tool is unavailable, ask in the final response and end the turn
@@ -49,6 +49,6 @@ Proceed to to-spec with this scope, revise the decisions, or stop here?
 
 Carry the displayed decision summary and the approving reply into `to-spec`. When there is no Skill tool, read the installed target `SKILL.md` and follow it at the point of its permitted call, including the alignment helpers; naming the skill is not invoking it
 
-While the gate is pending, do not load or delegate the downstream phase, draft a spec inline, create tickets, or write implementation code. Missing approval after a context reset means reopen the gate, not assume it was passed
+While the gate is pending, do not load or delegate the downstream phase, draft a spec inline, create tickets, or write implementation code. On resume, recover the displayed decision and user approval from the conversation or its referenced record; reuse an unchanged approval instead of replaying the gate. Ask only if that approval cannot be recovered
 
-Do not call `to-tickets` or `implement` here. `to-spec` owns its own confirmation gates and may not reuse this approval for ticket creation or implementation
+Do not call `to-tickets` or `implement` here. After the handoff, `to-spec` writes the complete specification, including testing decisions, without an extra test-seam gate. Its final gate approves that spec and its implementation; `to-tickets` then splits, publishes, and automatically invokes `implement` within the approved scope

@@ -63,6 +63,8 @@ Do NOT propose interfaces yet. After the file is written, ask the user: "Which o
 
 Once the user picks a candidate, call the Skill tool with "grilling" to walk the decision tree with them: constraints, dependencies, the shape of the deepened module, what sits behind the seam, what tests survive.
 
+Pass that this is a nested interview: return the settled decisions without a closing approval question. Continue domain-modeling and document updates, then confirm the complete refactoring decision and next action once at the final handoff below. Candidate selection and genuine design questions remain user decisions, not routine step approvals
+
 Side effects happen inline as decisions crystallize; call the Skill tool with "domain-modeling" to keep the domain model current as you go:
 
 - **Naming a deepened module after a concept not in `CONTEXT.md`?** Add the term to `CONTEXT.md`. Create the file lazily if it doesn't exist.
@@ -72,7 +74,7 @@ Side effects happen inline as decisions crystallize; call the Skill tool with "d
 
 ### Handoff to implementation
 
-After grilling and domain-modeling produce a settled refactoring decision, present it with its scope and relevant report/ADR links. Open a separate handoff gate so approving a candidate or an interview answer does not authorize specification work
+After grilling and domain-modeling produce a settled refactoring decision, present it with its scope and relevant report/ADR links. Use one final gate for this decision and specification work together; do not first confirm the decision and then ask again to continue. Selecting a candidate or answering an interview question does not approve the final plan
 
 ```text
 Awaiting confirmation: improve-codebase-architecture -> to-spec
@@ -90,5 +92,5 @@ After approval, state `Confirmed: improve-codebase-architecture -> to-spec` and 
 Do not call `to-tickets` or `implement` from inside this skill. The confirmed downstream path is:
 
 ```text
-/to-spec -> confirmation -> to-tickets -> confirmation -> implement
+/to-spec -> confirm spec and implementation -> to-tickets -> implement
 ```

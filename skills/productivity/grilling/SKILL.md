@@ -27,14 +27,18 @@ Finding _facts_ is your job, never the user's. When a frontier question needs a 
 
 The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed.
 
-## Confirmation gate
+## Return to a caller or confirm execution
+
+When another skill called `grilling`, return the settled decisions, scope, and remaining assumptions to that caller as soon as the frontier is empty. Do not add a confirmation gate just to return. The caller continues its own steps and owns any final plan or handoff confirmation. Keep genuine interview questions: returning automatically does not let the agent answer decisions on the user's behalf
+
+The confirmation gate below applies only when `grilling` is the top-level workflow
 
 When the frontier is empty, show the decisions, scope, and remaining assumptions. Name the next action before asking so agreement with an interview answer cannot silently authorize execution
 
 ```text
 Awaiting confirmation: shared understanding -> <next action>
 Ready: <decisions and scope>
-Next: <return to the caller, start TDD for this code task, or execute this non-code task>
+Next: <start TDD for this code task, or execute this non-code task>
 Confirm this understanding and next action, revise it, or stop here?
 ```
 
@@ -42,12 +46,12 @@ Translate the card into the user's language. End the turn using a final response
 
 Resume only after a later user reply explicitly approves that card. Earlier answers, a generic request to build something, silence, tool results, and an agent's own summary do not pass it. Questions or ambiguous replies stay in alignment; a correction or new requirement invalidates the old approval and needs a revised card
 
-When nested, confirmation returns the alignment to the caller only. It does not pass the caller's separate handoff gate, particularly `grill-with-docs -> to-spec`. If the conversation no longer contains the approval, ask again rather than invent it
+Reuse an already confirmed top-level scope and next action without repeating this gate. On resume, recover that decision from the conversation or its referenced record; ask only if the approval cannot be recovered or the scope materially changes
 
 ## Execution handoff
 
-After the user confirms the shared understanding in a later turn, choose the handoff by invocation mode
+Choose the handoff by invocation mode; only top-level execution needs the confirmation above
 
 - When `grilling` is the top-level workflow for a small, clear task, execute the agreed task. For a code change, call the Skill tool with "tdd"; the standalone TDD run owns the final `code-review`. Without a Skill tool, load the installed `tdd/SKILL.md` and follow it
-- When another skill called `grilling`, stop at shared understanding and return control to that caller. Do not start `tdd` from a nested grilling run
+- When another skill called `grilling`, return control without a closing approval question. Do not start `tdd` or a downstream phase from a nested grilling run
 - For a non-code task, execute the agreed writing, planning, or decision work directly without `tdd`

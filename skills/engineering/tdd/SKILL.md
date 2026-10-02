@@ -19,24 +19,13 @@ See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking g
 
 A **seam** is the public boundary you test at: the interface where you observe behavior without reaching inside. Tests live at seams, never against internals.
 
-**Test only at pre-agreed seams.** First identify the seams, scope, and their approval source in the conversation or referenced spec/ticket. Reuse explicit user approval for the same unchanged seams, including approval passed by `implement`, without asking again. A seam listed in a document or proposed by an agent is not approval by itself
+**Test the agreed behavior through public seams.** Reuse the task scope and any seams supplied by the caller or spec/ticket. If no seams are recorded, inspect the existing public interfaces, choose the smallest suitable test surface, and state which behavior it observes. Choosing routine test seams is part of execution, not a separate user approval
 
 When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose), call the Skill tool with "codebase-design" for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
 
-When approval is missing, show the proposed public interfaces and the behavior each test will observe. Agreeing these boundaries before coding keeps testing focused on the important behavior rather than every implementation detail
+Once the user has requested implementation of this settled task, or the caller passes valid implementation approval, proceed through seam selection, red, green, refactor, checks, and the review handoff without routine approval pauses. A standalone small task needs no spec or ticket. Do not turn a request only to discuss or plan into permission to implement
 
-```text
-Awaiting confirmation: test seams -> TDD
-Ready: <seams, behaviors, and scope>
-Next: write the first failing test, then implement at these seams
-Use these seams, revise them, or stop here?
-```
-
-Translate the card into the user's language. Use a final response or an input request that waits for the user; if unavailable, end the turn with the card. Do not write tests or production code, including via a subagent, while the gate is pending
-
-Resume only after a later user reply explicitly approves the displayed seams. An earlier "fix this", silence, a tool result, or agreement to a different phase is not approval. Clarify an ambiguous answer; revise and ask again if the seams or scope change. Missing approval history means reopen this gate
-
-After approval, state which seams were confirmed and start the loop. This is not a new spec requirement for the minimal workflow, and it adds no extra confirmation before the final review
+Ask the user only when proceeding requires a material change to the agreed behavior, scope, or public contract, or a real unresolved product decision. Explain that decision and wait before making the disputed change; routine test placement and equivalent test coverage do not reopen approval
 
 ## Anti-patterns
 
@@ -58,4 +47,4 @@ This skill owns at most one `code-review` call per standalone TDD run
 
 - When TDD is invoked directly or by a workflow other than `implement`, capture the fixed point before the first slice, complete all slices, and call the Skill tool with "code-review" exactly once after the final checks pass
 - When TDD is invoked by `implement`, do not execute the `code-review` step here. Return control to `implement`, which owns the single review for the complete ticket
-- If the invocation context is unclear, do not start a second review. Ask which skill owns the current run's final review
+- Resolve review ownership from the caller and handoff, not by asking the user to choose an internal workflow detail. With no `implement` caller, TDD owns the review. Reuse an already completed review of this run's unchanged final diff rather than invoking it twice

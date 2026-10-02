@@ -276,39 +276,45 @@ Claude Code 对应目录是 `.claude/skills`。
 
 | # | 工作流 | 适用场景 | 详细运行流程（括号为内部调用） | 最终结果 |
 |---|---|---|---|---|
-| 1 | **简单任务** | 改文案、调样式、小功能、简单修复、普通文档或规划 | ① `grilling`<br>② 【确认门】用户确认需求<br>③ Agent 执行<br>④ 代码任务：`tdd`（`grilling` 顶层内部调用）<br>⑤ `code-review`（`tdd` 内部调用）<br>非代码任务：第③步输出结果后结束 | 代码变更完成并审查；非代码任务直接交付 |
-| 2 | **标准开发** | 需求明确，需要正式规格、任务拆分和完整实现 | ① `grill-with-docs`（内部调用：`grilling` + `domain-modeling`）<br>② 【确认门】确认对齐结果<br>③ `to-spec`（`grill-with-docs` 内部调用）<br>④ 【确认门】确认 spec<br>⑤ `to-tickets`（`to-spec` 内部调用）<br>⑥ 【确认门】确认 frontier Ticket<br>⑦ `implement`（`to-tickets` 内部调用）<br>⑧ `tdd`（`implement` 内部调用，跳过 TDD 自己的审查步骤）<br>⑨ `code-review`（`implement` 内部调用） | 一个已批准 Ticket 完成 TDD、检查和一次最终审查 |
-| 3 | **模糊大任务** | 目标模糊、未知项很多，需要先探索再决定 | ① `wayfinder`（内部调用：`grilling` + `domain-modeling`）<br>② 创建并解决 decision Tickets（按 Ticket 内部调用：`research` / `prototype` / `grilling` / `domain-modeling`）<br>③ 【确认门】地图完成，确认交接<br>④ `to-spec`（`wayfinder` 内部调用）<br>⑤ 【确认门】确认 spec<br>⑥ `to-tickets`（`to-spec` 内部调用）<br>⑦ 【确认门】确认 frontier Ticket<br>⑧ `implement`（`to-tickets` 内部调用）<br>⑨ `tdd`（`implement` 内部调用）<br>⑩ `code-review`（`implement` 内部调用） | 先完成调查和决策，再进入正式开发；Wayfinder 不实现业务 Ticket |
-| 4 | **架构改进** | 扫描代码坏味道、寻找 Deep Module 和系统性重构机会 | ① `improve-codebase-architecture`（内部调用：`codebase-design`）<br>② 扫描代码库并生成 HTML 报告<br>③ 用户选择候选<br>④ `grilling` + `domain-modeling`（架构 Skill 内部调用）<br>⑤ 【确认门】确认重构决策<br>⑥ `to-spec`（架构 Skill 内部调用）<br>⑦ 【确认门】确认 spec<br>⑧ `to-tickets`（`to-spec` 内部调用）<br>⑨ 【确认门】确认 frontier Ticket<br>⑩ `implement`（`to-tickets` 内部调用）<br>⑪ `tdd`（`implement` 内部调用）<br>⑫ `code-review`（`implement` 内部调用） | 重构决策经过规格和 Ticket 确认后实施；不能从架构报告直接进入 `implement` |
+| 1 | **简单任务** | 改文案、调样式、小功能、简单修复、普通文档或规划 | ① `grilling`<br>② 【确认门】确认需求和执行<br>③ Agent 执行<br>④ 代码任务：`tdd`（`grilling` 顶层内部调用，自行确定测试边界）<br>⑤ `code-review`（`tdd` 内部调用，无额外确认）<br>非代码任务：第③步输出结果后结束 | 代码变更完成并审查；非代码任务直接交付 |
+| 2 | **标准开发** | 需求明确，需要正式规格、任务拆分和完整实现 | ① `grill-with-docs`（内部调用：`grilling` + `domain-modeling`，子步骤不重复确认）<br>② 【确认门】确认方案并写规格<br>③ `to-spec`（`grill-with-docs` 内部调用，完成规格及测试方案）<br>④ 【确认门】确认完整 spec 并授权拆分、实施<br>⑤ `to-tickets`（`to-spec` 内部调用，自动拆分、发布，无确认门）<br>⑥ `implement`（`to-tickets` 自动内部调用，按依赖逐张执行）<br>⑦ `tdd`（`implement` 内部调用，跳过 TDD 自己的审查步骤）<br>⑧ `code-review`（`implement` 内部调用） | 已批准规格内的 Ticket 连续完成；每张都有 TDD、检查和一次最终审查 |
+| 3 | **模糊大任务** | 目标模糊、未知项很多，需要先探索再决定 | ① `wayfinder`（内部调用：`grilling` + `domain-modeling`）<br>② 创建并解决 decision Tickets（按 Ticket 内部调用：`research` / `prototype` / `grilling` / `domain-modeling`）<br>③ 【确认门】地图完成，确认方案并写规格<br>④ `to-spec`（`wayfinder` 内部调用，含测试方案）<br>⑤ 【确认门】确认完整 spec 并授权拆分、实施<br>⑥ `to-tickets`（`to-spec` 内部调用，自动拆分、发布，无确认门）<br>⑦ `implement`（`to-tickets` 自动内部调用）<br>⑧ `tdd`（`implement` 内部调用）<br>⑨ `code-review`（`implement` 内部调用） | 先完成调查和决策，再进入正式开发；Wayfinder 不实现业务 Ticket |
+| 4 | **架构改进** | 扫描代码坏味道、寻找 Deep Module 和系统性重构机会 | ① `improve-codebase-architecture`（内部调用：`codebase-design`）<br>② 扫描代码库并生成 HTML 报告<br>③ 用户选择候选<br>④ `grilling` + `domain-modeling`（架构 Skill 内部调用，子步骤不重复确认）<br>⑤ 【确认门】确认重构方案并写规格<br>⑥ `to-spec`（架构 Skill 内部调用，含测试方案）<br>⑦ 【确认门】确认完整 spec 并授权拆分、实施<br>⑧ `to-tickets`（`to-spec` 内部调用，自动拆分、发布，无确认门）<br>⑨ `implement`（`to-tickets` 自动内部调用）<br>⑩ `tdd`（`implement` 内部调用）<br>⑪ `code-review`（`implement` 内部调用） | 重构规格获批后自动拆分实施；不能从架构报告直接进入 `implement` |
 | 5 | **Bug 调试** | 顽固 Bug、修 A 坏 B、根因不清楚 | ① `diagnosing-bugs`<br>② 复现 → 最小化 → 验证假设 → 修复 → 回归测试<br>③ 【确认门】用户确认进入审查<br>④ `code-review`（`diagnosing-bugs` 内部调用）<br>⑤ 修复有效审查意见<br>⑥ 提交 | 修复完成、回归测试通过、审查一次后提交 |
-| 6 | **研究后开发** | 技术、库、SDK 或方案不熟悉，需要先查清楚再开发 | ① `research` → 生成 `research/*.md`<br>② **停止并提示用户手动启动** `grill-with-docs`（不是 `research` 内部调用）<br>③ `grill-with-docs`（内部调用：`grilling` + `domain-modeling`）<br>④ 【确认门】确认对齐结果<br>⑤ `to-spec`（`grill-with-docs` 内部调用）<br>⑥ 【确认门】确认 spec<br>⑦ `to-tickets`（`to-spec` 内部调用）<br>⑧ 【确认门】确认 frontier Ticket<br>⑨ `implement`（`to-tickets` 内部调用）<br>⑩ `tdd`（`implement` 内部调用）<br>⑪ `code-review`（`implement` 内部调用） | 调研结果进入标准开发链；不让研究 Skill 越过人工规划门 |
+| 6 | **研究后开发** | 技术、库、SDK 或方案不熟悉，需要先查清楚再开发 | ① `research` → 生成 `research/*.md`<br>② **停止并提示用户手动启动** `grill-with-docs`（不是 `research` 内部调用）<br>③ `grill-with-docs`（内部调用：`grilling` + `domain-modeling`）<br>④ 【确认门】确认方案并写规格<br>⑤ `to-spec`（`grill-with-docs` 内部调用，含测试方案）<br>⑥ 【确认门】确认完整 spec 并授权拆分、实施<br>⑦ `to-tickets`（`to-spec` 内部调用，自动拆分、发布，无确认门）<br>⑧ `implement`（`to-tickets` 自动内部调用）<br>⑨ `tdd`（`implement` 内部调用）<br>⑩ `code-review`（`implement` 内部调用） | 调研结果进入标准开发链；不让研究 Skill 越过人工规划门 |
 
 上表中每个 Skill 都是运行时硬依赖，没有可选项。`tdd -> codebase-design -> prototype` 这条链让 `codebase-design` 和 `prototype` 进入除 Bug 调试外的所有工作流；`wayfinder` 另外直接依赖 `research` 和 `prototype`。
 
 ### 确认门如何工作
 
-确认门是 Skill 内的交互指令，不是安装器或客户端提供的程序锁。Agent 先判断当前阶段，再显示“待确认：当前阶段 -> 下一阶段”，列出范围、产物和下一步，然后结束本轮，等待你回复；不能一边说“请确认”一边继续做，也不能提前读取下一阶段的 Skill。
+**按决策设门，不按步骤或 Skill 数量设门。** 内部分析、文档更新、测试边界选择、红绿重构和审查仍须执行，但不逐步询问。嵌套 `grilling` 问清楚后直接返回，由外层统一确认最终方案。
+
+确认门是 Skill 内的交互指令，不是安装器或客户端提供的程序锁。保留的门必须展示具体结果、范围和下一步，然后结束本轮等待回复；不能一边说“请确认”一边继续做，也不能提前读取、执行或委派尚未获准的下游阶段。确认后自动衔接，不再为相同范围重复询问。
 
 ```text
 展示当前结果和下一步 -> 等待你的回复
-                      ├─ 明确同意当前交接 -> 加载下一个 Skill
+                      ├─ 明确同意当前交接 -> 连续执行到下一个关键决策点
                       ├─ 提问或含糊回复   -> 澄清，继续等待
-                      └─ 修改范围         -> 更新结果，重新确认
+                      └─ 实质改变方案或范围 -> 更新结果，重新确认
 ```
 
 | 所在 Skill | 等待你确认的内容 | 确认后执行 |
 |---|---|---|
-| `grilling` | 需求理解及下一步 | 嵌套时只返回调用方；顶层代码任务进入 `tdd`，非代码任务直接执行 |
-| `grill-with-docs` | 是否把当前对齐结果写成规格 | 显式调用 `to-spec`；对 `grilling` 的回答不代替这次交接确认 |
-| `to-spec` | 测试边界；完成的 spec 是否可以拆任务 | 先写规格，再经独立确认调用 `to-tickets` |
-| `to-tickets` | 拆分及阻塞关系是否可发布；是否开工指定 Ticket | 先发布，再经独立确认调用 `implement`，一次只做一个 Ticket |
+| `grilling`（仅顶层） | 一次确认需求及执行 | 代码任务进入 `tdd`，非代码任务直接执行；嵌套调用没有收尾确认门 |
+| `grill-with-docs` | 一次确认完整方案并写规格 | 调用 `to-spec`，直接完成规格及测试方案，不再停在测试边界审批 |
+| `to-spec` | 一次确认完整规格（包含测试方案）并授权实施 | 调用 `to-tickets`，自动拆分、发布并进入实现，不再审批任务清单 |
+| `to-tickets` | 无常规确认门；继承规格中的实施授权 | 自动拆分、检查依赖、发布并调用 `implement`；明确“只拆任务”则拆完结束 |
 | `wayfinder` | 决策 Ticket 和未知项已解决后，是否写规格 | 调用 `to-spec`；只有 frontier 为空不代表地图完成 |
 | `improve-codebase-architecture` | 报告候选选择；重构决策是否写成规格 | 先探索所选候选，再经交接确认调用 `to-spec` |
 | `diagnosing-bugs` | 已验证的修复是否进入审查 | 调用一次 `code-review`，处理有效意见后提交 |
-| `implement` | 指定规格或 Ticket 是否已有开工批准 | 校验上游批准后执行；只缺批准时停下来询问，不把 ready 状态当许可 |
-| `tdd` | 尚未批准的测试边界 | 开始红绿重构；沿用相同范围的已有批准，不重复询问 |
+| `implement` | 无常规新门；自行校验上游开工批准 | 连续执行 `tdd → code-review`；已批准批次内的 Ticket 不逐张重复确认 |
+| `tdd` | 无常规新门；只有实质变更或未解决的需求才询问 | 自行确定适当测试边界，连续红绿重构；独立运行自动审查，嵌套时由 `implement` 审查 |
 
-`to-spec`、`to-tickets`、`implement` 还会检查上一步交接和用户批准是否存在。直接指定某个 Skill 可启动该阶段，但不授权它越过后续确认门。旧的“开始开发”、工具输出、Issue 的 ready 状态或 Agent 自称已批准，都不能代替当前交接确认；范围改变后要重新确认。
+`to-spec`、`to-tickets`、`implement` 的入口检查由 Agent 自行完成，不是让用户再确认一次。直接指定某个 Skill 可启动该阶段，但不授权它越过后续确认门。压缩或恢复会话后先查找已有的决策和用户批准记录，找不到才补问；工具输出、Issue 的 ready 状态或 Agent 自称已批准不能代替用户授权。
+
+`to-spec` 的最终确认明确询问“是否按这份规格拆分并实施”。批准后，`to-tickets` 默认连续执行这份规格内全部派生任务，不只做第一张；若用户指定较小范围，则严格遵守。按依赖逐张实施，每张完成测试和审查后记录完成，再继续下一张。只拆任务、只发布或旧版仅授权拆分的回复，不视为实施许可；拆分若发现规格缺漏或实质变更，才针对新决策询问。
+
+需求问答、原型反馈、架构候选选择仍保留，它们不是机械的“是否继续”。`wayfinder` 的单次会话调查限制、`research` 完成后的手动交接本次不变；减少审批不等于让调查自动变成业务实现。
 
 调用下一 Skill 时，有 Skill 工具就使用它；没有时读取已安装的对应 `SKILL.md` 并执行，不能只在回复中提到名字。仓库修改或 push 不会自动更新各项目已安装的副本，使用新规则前需更新对应安装目录。
 
@@ -322,7 +328,7 @@ Claude Code 对应目录是 `.claude/skills`。
 - 没有项目初始化步骤：`to-spec`、`to-tickets`、`wayfinder` 各自判断 tracker，有 GitHub remote 且 `gh` 可用就写 Issues，否则写 `.scratch/`
 - 三个 tracker Skill 各自捆绑 `references/github-tracker.md`：tracker 选 GitHub 时按需读取，内含 `gh` 命令速查、标签存在才打、阻塞边写法和认证失败回退 `.scratch/` 的规则
 - `grilling`：顶层小任务可进入执行；嵌套调用只返回对齐结果
-- `to-spec -> to-tickets -> implement`：按顺序衔接，每一步都遵守自己的确认门
+- `to-spec -> to-tickets -> implement`：完整规格与实施授权确认一次，之后自动拆分、发布和逐张实施，`to-tickets` 不再设确认门
 - `tdd`：独立运行时调用一次 `code-review`；被 `implement` 调用时跳过内部审查
 - `implement`：完成整个 Ticket 后统一调用一次 `code-review`
 - `diagnosing-bugs`：修复验证完成并经用户确认后调用一次 `code-review`
@@ -349,7 +355,7 @@ Claude Code 对应目录是 `.claude/skills`。
 | [`code-review`](skills/engineering/code-review/SKILL.md) | **自动 + 手动** | 审查基础能力 | 沿代码标准轴和规格符合度轴并行执行双轴审查 |
 | [`ask-matt`](skills/engineering/ask-matt/SKILL.md) | **仅手动** | Skill 路由入口 | 用户不知道使用哪个 Skill 时，根据任务选择正确入口或工作流 |
 | [`to-spec`](skills/engineering/to-spec/SKILL.md) | **自动 + 手动** | 确认门节点 | 把已对齐内容写成正式规格，用户确认后调用 `to-tickets` |
-| [`to-tickets`](skills/engineering/to-tickets/SKILL.md) | **自动 + 手动** | 确认门节点 | 把规格拆成 Tracer Bullet 垂直切片，用户确认后调用 `implement` |
+| [`to-tickets`](skills/engineering/to-tickets/SKILL.md) | **自动 + 手动** | 自动拆分执行节点 | 把已批准规格拆成 Tracer Bullet 垂直切片，自动调用 `implement`，不重复确认 |
 | [`implement`](skills/engineering/implement/SKILL.md) | **自动 + 手动** | 实现节点 | 实现一个已批准的规格或 Ticket，内部运行 TDD，最终统一审查一次 |
 | [`diagnosing-bugs`](skills/engineering/diagnosing-bugs/SKILL.md) | **自动 + 手动** | Bug 工作流入口 | 系统化执行复现、最小化、假设验证、修复和回归测试，确认后进入审查 |
 | [`research`](skills/engineering/research/SKILL.md) | **自动 + 手动** | 调研基础能力 | 查询高可信一手资料并生成带引用的 `research/*.md` |
@@ -436,7 +442,7 @@ git merge main
 node scripts/check-manifest.mjs
 scripts/install-skills.sh --list
 scripts/install-skills.sh --list-workflows
-node --test scripts/check-manifest.test.mjs
+node --test scripts/*.test.mjs
 git diff --check
 ```
 
@@ -464,6 +470,7 @@ asenMattPocock-SKILL/
 ├── scripts/
 │   ├── check-manifest.mjs                 # 校验 manifest 与 SKILL.md 真实调用是否一致
 │   ├── check-manifest.test.mjs            # 调用声明及依赖校验的回归测试
+│   ├── workflow-gates.test.mjs            # 确认门数量、去重和执行边界的静态回归
 │   ├── install-skills.sh                  # Claude/Codex 项目级与全局安装入口
 │   ├── list-skills.sh                     # 列出仓库内所有 SKILL.md
 │   └── resolve-skills.mjs                 # 根据 manifest 展开安装依赖

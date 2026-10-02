@@ -16,12 +16,12 @@
       "id": 2,
       "name": "approved-handoff-loads-to-spec",
       "prompt": "Resume grill-with-docs. The interview and glossary are complete for exporting filtered orders to CSV with ID and total columns, excluding import and background jobs. The last assistant response displayed that scope and asked 'Awaiting confirmation: grill-with-docs -> to-spec. Proceed to write the specification for this scope?' The user's subsequent reply is 'Yes, enter to-spec and write the specification for exactly that scope'. No test seams have been proposed or approved. Continue without repeating the completed interview.",
-      "expected_output": "Actually load to-spec, carry the confirmed scope, then stop at its test-seam approval gate rather than repeating the alignment handoff or proceeding straight to tickets/code",
+      "expected_output": "Actually load to-spec, carry the confirmed scope, inspect existing interfaces, write the complete spec including testing decisions, then stop at the spec-to-tickets gate without any separate seam approval",
       "files": [],
       "assertions": [
         "The installed to-spec/SKILL.md is loaded after the approved handoff",
-        "The next user-facing question concerns the unapproved testing boundaries",
-        "No to-tickets, implement, or tdd call and no specification, ticket, or code write occurs before seam approval"
+        "A complete spec includes testing decisions without a separate test-seam question or repeated entry approval",
+        "The next approval question covers the complete spec plus ticket publication and implementation; no to-tickets, implement, tdd, ticket, or implementation code occurs before that approval"
       ]
     },
     {
@@ -60,14 +60,14 @@
     },
     {
       "id": 6,
-      "name": "direct-to-spec-stops-at-seams",
+      "name": "direct-to-spec-completes-spec",
       "entry_skill": "to-spec",
       "prompt": "The user directly requests: 'Run to-spec for the agreed CSV export of filtered orders with ID and total columns, excluding import and background jobs'. No test seams have been proposed or approved. Start that skill without restarting the completed requirements interview.",
-      "expected_output": "Accept the direct request as entry approval, propose test boundaries and stop for their confirmation; do not replay the grill-with-docs handoff or draft the spec yet",
+      "expected_output": "Accept the direct request as entry approval, inspect the codebase, write the complete spec with test boundaries, and stop only at the final spec-to-tickets gate",
       "files": [],
       "assertions": [
-        "The pending question is about proposed test boundaries, not permission to enter to-spec or restart requirements alignment",
-        "No specification is drafted and no to-tickets, implement, or tdd skill is loaded"
+        "The complete spec includes test boundaries without separate seam approval or a restarted requirements interview",
+        "The pending question explicitly covers the complete spec and downstream implementation; no to-tickets, implement, or tdd skill is loaded before approval"
       ]
     },
     {
@@ -75,11 +75,11 @@
       "name": "publication-is-not-implementation",
       "entry_skill": "to-tickets",
       "prompt": "Resume to-tickets after the user approved this exact breakdown for publication: ticket 1 exports filtered orders as CSV with ID and total columns, no blockers; ticket 2 adds empty-result and CSV-escaping behavior and is blocked by ticket 1. Both tickets use the already user-approved public CSV export seam. The prior assistant card said 'Awaiting confirmation: ticket breakdown -> publication; publish these tickets, not start implementation?' The user's reply was 'Yes, publish those two tickets'. This project uses local Markdown under .scratch/orders-export/. Continue to the next gate, without inventing permission to implement either ticket.",
-      "expected_output": "Publish or display the intended two ticket documents, then ask permission to implement ticket 1 and stop without loading implement or tdd",
+      "expected_output": "Publish the two approved tickets and stop, respecting publication-only authorization without asking again to start implementation",
       "files": [],
       "assertions": [
         "The reply contains the two approved ticket drafts and preserves the blocker from ticket 2 to ticket 1",
-        "The reply asks for approval to implement exactly the first unblocked ticket",
+        "The reply stops after publication rather than reopening an implementation approval question",
         "No implement or tdd skill is loaded and no implementation code is produced"
       ]
     },
@@ -105,6 +105,155 @@
       "assertions": [
         "The reply respects the user's decision to stop and does not reopen the same handoff question",
         "No downstream skill is loaded and no specification, ticket, or implementation is produced"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "nested-grilling-returns-without-gate",
+      "entry_skill": "grilling",
+      "prompt": "You are the grilling helper called by grill-with-docs. All design branches for exporting filtered orders to CSV are settled: ID,total columns, headers only for an empty list, correct quoting for commas and quotes, no imports or jobs. The final outstanding question was 'Should an empty list return just the header?' and the user answered 'Yes'. There are no remaining assumptions. Finish this helper call; the parent still needs to finish its documents.",
+      "expected_output": "Return the settled decisions and scope directly to the caller without a closing confirmation question and without starting a downstream phase",
+      "files": [],
+      "assertions": [
+        "Returns the settled alignment without an Awaiting confirmation card or another approval question",
+        "Does not load tdd or to-spec or implement anything on behalf of the parent"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "tdd-selects-routine-seams",
+      "entry_skill": "tdd",
+      "prompt": "The user requests: 'Use TDD to fix exportOrdersToCsv so a field containing a comma is quoted. Preserve the existing function signature and all other behavior. Implement the fix.' The project already exports that pure function and uses node:test. There is no spec, ticket, or separate test-boundary approval. In this read-only exercise, show the next test you would add without claiming to execute it.",
+      "expected_output": "Choose the existing exportOrdersToCsv public interface and draft a meaningful failing test without pausing for test-boundary approval or requiring a spec",
+      "files": [],
+      "assertions": [
+        "Drafts a failing test for the requested comma quoting at the existing public interface",
+        "Does not ask for test-seam approval or require spec/ticket preparation",
+        "Does not claim tests or reviews ran"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "decomposition-only-does-not-implement",
+      "entry_skill": "to-tickets",
+      "prompt": "The user directly asks: 'Split the approved CSV export spec into implementation tickets.' The settled spec requires exporting filtered orders as CSV with ID,total columns, header-only output for no orders, correct quoting, no import or background jobs. The public function exportOrdersToCsv is the chosen seam. Use local Markdown under .scratch/shop-export/. No ticket breakdown has been shown or approved yet.",
+      "expected_output": "Split the spec into vertical tickets with blocking edges and write them to the requested local tracker, then finish without another confirmation or implementation because the user only requested task decomposition",
+      "files": [],
+      "assertions": [
+        "Produces vertical tickets with blocking edges without asking approval of the breakdown",
+        "Stops after the requested decomposition without prompting to start implementation",
+        "Does not load implement or write implementation code"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "approved-plan-publishes-and-starts",
+      "entry_skill": "to-tickets",
+      "prompt": "Resume to-tickets. You previously showed the full two-ticket plan, acceptance criteria and exportOrdersToCsv test seam: 01 exports ID,total CSV and handles empty lists (no blockers); 02 adds quote escaping (blocked by 01). Destination: local .scratch/shop-export/issues/. The final card asked 'Approve this plan, publish both tickets, and implement only 01?' The user replied 'Yes, publish both and implement 01.' Continue with this exact unchanged plan.",
+      "expected_output": "Publish both tickets, load implement for 01, and begin its implementation without asking again to publish, start, or approve routine seams; do not execute 02",
+      "files": [],
+      "assertions": [
+        "Publishes the approved tickets and loads implement for 01 in the same continuation",
+        "Does not add a second approval question before starting 01",
+        "Does not implement 02 or silently expand the execution selection; after completing 01, reports the result without prompting to start 02"
+      ]
+    },
+    {
+      "id": 14,
+      "name": "approved-batch-continues",
+      "entry_skill": "to-tickets",
+      "prompt": "Resume to-tickets after implementing a ticket. At the to-spec final card, the user replied 'Approve this CSV spec and implement its full scope after splitting and publishing tasks.' No ticket IDs existed then. You derived and published 01 plain CSV export (unblocked) and 02 comma quoting (blocked by 01); both trace exactly to the approved spec. implement has just returned for 01 with all acceptance criteria, tests and its final review completed. 02 is unchanged, has no other blockers, and has not started. Continue from this point.",
+      "expected_output": "Record ticket 01 complete, verify 02 is unblocked, and call implement for 02 without another user approval",
+      "files": [],
+      "assertions": [
+        "Records or verifies completion of 01 and checks the dependency before calling implement for 02",
+        "Reuses the parent spec implementation approval without requiring separate approval of derived ticket IDs",
+        "Does not skip testing or final review for 02"
+      ]
+    },
+    {
+      "id": 15,
+      "name": "batch-blocker-does-not-expand-scope",
+      "entry_skill": "to-tickets",
+      "prompt": "Resume the execution of an approved published batch containing only CSV tickets 01 and 02. 01 is complete. Ticket 02 depends on 01 and an existing external prerequisite 'Order access API', which is unresolved, outside this approved batch, and has no implementation permission. No selected ticket is currently runnable. Continue appropriately.",
+      "expected_output": "Report the actual blocker and stop the execution; do not implement the external prerequisite, mark it complete, or ask the user to reapprove unchanged ticket 02 as if that resolved the blocker",
+      "files": [],
+      "assertions": [
+        "Does not execute blocked ticket 02 or its unapproved prerequisite",
+        "Names the unresolved dependency rather than treating another yes as sufficient to proceed"
+      ]
+    },
+    {
+      "id": 16,
+      "name": "implement-missing-seams-is-not-a-gate",
+      "entry_skill": "implement",
+      "prompt": "The user directly asks: 'Implement the approved ticket to quote commas in CSV fields.' The ticket identifies scope and acceptance criteria: quote comma-containing fields, preserve all other behavior and the exportOrdersToCsv signature. It has no blockers. No test-seam section exists. Existing node:test tests exercise exportOrdersToCsv through its public export. Start the work.",
+      "expected_output": "Accept the direct implementation authorization, capture the baseline and call tdd to use the existing public interface without sending the user back to planning for missing seam metadata",
+      "files": [],
+      "assertions": [
+        "Loads tdd without a new implementation or seam approval question",
+        "Assigns the final review to implement and tells nested tdd not to invoke code-review"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "top-level-grilling-keeps-execution-gate",
+      "entry_skill": "grilling",
+      "prompt": "You are running grilling as the top-level skill for a small CSV quoting fix. The final outstanding question was 'Should fields containing commas be enclosed in double quotes?' The user answered 'Yes'. All questions are now settled. No complete-scope execution card has been shown and the user has not approved starting implementation after alignment. Finish alignment.",
+      "expected_output": "Show one complete-scope execution confirmation and stop before loading tdd or writing code",
+      "files": [],
+      "assertions": [
+        "Displays the settled scope and asks whether to implement it",
+        "Does not confuse the final interview answer with execution approval or load tdd before approval"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "tdd-material-contract-change-needs-user",
+      "entry_skill": "tdd",
+      "prompt": "The approved task is to quote commas in CSV fields while preserving the public synchronous exportOrdersToCsv(orders): string interface. During TDD, an implementation idea would instead make the function async and return a Promise, requiring callers to change. The user never approved that contract change. State how you proceed; this is a read-only exercise.",
+      "expected_output": "Prefer a fix preserving the approved contract; if a contract change is truly required, explain it and wait for the user before changing it",
+      "files": [],
+      "assertions": [
+        "Does not silently treat an incompatible public contract change as routine seam selection",
+        "Preserves the synchronous contract or asks for the material change before implementing it"
+      ]
+    },
+    {
+      "id": 19,
+      "name": "approved-spec-auto-decomposes-and-implements",
+      "entry_skill": "to-tickets",
+      "prompt": "to-spec has handed off a published spec for exportOrdersToCsv: synchronous ID,total CSV, header-only for empty lists, quote comma-containing fields, no import or new UI. Its final card explicitly asked to approve the spec, split and publish tickets locally under .scratch/shop-export/, then implement them in dependency order. The user replied 'Yes, proceed with this spec and implementation.' No tickets exist and no ticket breakdown has been approved. Continue the workflow.",
+      "expected_output": "Decompose and publish tickets, then actually load implement for the first unblocked ticket without any new approval question; pass the spec implementation authorization and continue through its derived scope",
+      "files": [],
+      "assertions": [
+        "Produces and publishes derived tickets without a ticket confirmation gate",
+        "Loads implement automatically with the parent spec and original implementation authorization",
+        "Does not require separate approval of the first ticket or limit execution to it by default"
+      ]
+    },
+    {
+      "id": 20,
+      "name": "spec-gate-tasks-only-restriction",
+      "entry_skill": "to-spec",
+      "prompt": "Resume to-spec at the published CSV export specification's final card. The card offered to approve the spec, split and publish tickets, then implement in dependency order. The user replies 'The spec is approved, but only split the tasks. Do not implement yet.' The spec is unchanged. Continue.",
+      "expected_output": "Call to-tickets with an explicit no-implementation restriction, complete decomposition and publication, then stop without implement or another approval question",
+      "files": [],
+      "assertions": [
+        "Passes the user's tasks-only restriction to to-tickets",
+        "Does not load implement or tdd, write code, or ask to start implementation"
+      ]
+    },
+    {
+      "id": 21,
+      "name": "derived-ticket-cannot-expand-spec",
+      "entry_skill": "to-tickets",
+      "prompt": "The user approved implementation of a CSV export-only spec, explicitly excluding CSV import and database writes. While splitting it you notice a suggested ticket to add CSV import. No user approved changing the spec. Continue decomposition for the authorized export scope.",
+      "expected_output": "Exclude the import ticket and proceed within export scope, or ask if a genuinely necessary changed decision blocks work; never treat spec approval as permission to implement import",
+      "files": [],
+      "assertions": [
+        "Rejects CSV import as outside the authorized spec",
+        "Does not publish or implement import as an approved derived ticket"
       ]
     }
   ]

@@ -21,6 +21,7 @@
 - 自动 + 手动 Skill 不得设置 `disable-model-invocation: true`；Agent 可以自动选择，用户也可以明确启动。
 - 仅手动 Skill 必须设置 `disable-model-invocation: true`，并在 `agents/openai.yaml` 设置 `policy.allow_implicit_invocation: false`。
 - 自动 + 手动的工作流节点通过确认门保留人工控制，允许被上游 Skill 调用，也允许用户直接启动。
+- 确认门只放在明确的方案决策和执行授权处，不按内部步骤或 Skill 调用次数设置。嵌套 `grilling` 直接返回；测试边界分析保留但不单独审批；`to-spec` 最终确认规格及实施授权，`to-tickets` 不设常规确认门，自动拆分、发布并调用 `implement`。只拆任务的请求不得升级为实施。已批准的同范围交接或批次不得重复询问，保留的门必须真实等待用户回复。
 - `scripts/install-skills.sh` 是对外安装入口。它必须按 `skills/manifest.json` 自动展开 Skill 或 `--workflow` 的必需依赖闭包，支持项目级、全局、Claude Code 和 Codex。
 - `dependsOn` 必须与 `SKILL.md` 中真实的 `Call the Skill tool with "name"` 一致。有显式调用就是必需依赖，不得降级成可选。
 - 条件分支 Skill 记录在 `workflows.<name>.optionalSkills`，只有 `--with-optional` 才随工作流安装。当前六条工作流都为空，因为所有依赖都是显式调用。

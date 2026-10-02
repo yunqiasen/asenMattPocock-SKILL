@@ -14,5 +14,5 @@
 | [research](research/SKILL.md) | 自动 + 手动 | 基于高可信一手资料调研并生成引用文档 |
 | [tdd](tdd/SKILL.md) | 自动 + 手动 | 失败测试、最小实现、重构和提交 |
 | [to-spec](to-spec/SKILL.md) | 自动 + 手动 | 对齐结果转正式规格，确认后调用 `to-tickets` |
-| [to-tickets](to-tickets/SKILL.md) | 自动 + 手动 | 规格转 Tracer Bullet Ticket，确认后调用 `implement` |
+| [to-tickets](to-tickets/SKILL.md) | 自动 + 手动 | 已批准规格转 Tracer Bullet Ticket，自动调用 `implement`，不重复确认 |
 | [wayfinder](wayfinder/SKILL.md) | 仅手动 | 大任务探索地图和调查决策 Ticket |

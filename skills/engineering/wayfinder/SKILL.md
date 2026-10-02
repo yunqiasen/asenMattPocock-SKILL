@@ -104,6 +104,8 @@ Ruling something out of scope is a scoping act, not a step on the route. When a 
 
 ## Invocation
 
+Treat `grilling` as a nested helper: it asks genuine decision questions, then returns without a closing approval gate. Continue recording the decision and updating the map without asking permission for each step. Keep the session limits below; removing duplicate approvals does not turn decision tickets into implementation tickets
+
 Two modes. Either way, **never resolve more than one ticket per session**, with the exception of research tickets.
 
 ### Chart the map
@@ -148,8 +150,8 @@ If the user asks a question or gives an ambiguous reply, clarify and repeat the 
 
 After approval, state `Confirmed: wayfinder -> to-spec` and call the Skill tool with "to-spec", passing the map, decisions, and the approving reply. Without a Skill tool, load the installed `to-spec/SKILL.md` and follow it
 
-Do not call `to-tickets` or `implement` from inside wayfinder. Those remain downstream confirmation-gated phases. The next path is:
+Do not call `to-tickets` or `implement` from inside wayfinder. The completed spec has one downstream confirmation before automatic decomposition and implementation. The next path is:
 
 ```text
-/to-spec -> confirmation -> to-tickets -> confirmation -> implement
+/to-spec -> confirm spec and implementation -> to-tickets -> implement
 ```

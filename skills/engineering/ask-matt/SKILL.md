@@ -13,7 +13,7 @@ Use this router when the user does not know which skill fits the task.
 1. No project setup step is needed. Every skill picks its own tracker: GitHub Issues when the repository has a GitHub remote, `.scratch/` otherwise.
 2. Use `/grill-with-docs` for repository-bound planning. It invokes `grilling` and `domain-modeling` and records `CONTEXT.md` and ADR decisions.
 3. Use `to-spec` when the conversation is settled and needs a formal specification. After the user confirms the spec, it calls `to-tickets`.
-4. Use `to-tickets` when the work must be split into tracer-bullet vertical slices with blocking edges. After the user confirms the frontier ticket, it calls `implement` for one ticket.
+4. Use `to-tickets` when the work must be split into tracer-bullet vertical slices with blocking edges. After the spec and implementation are approved, it splits and publishes the tasks, then automatically calls `implement` one ticket at a time within that scope, without another gate. Decomposition-only or publication-only requests stop after that work.
 5. `implement` builds from the confirmed spec or ticket. It invokes `tdd`, ignores TDD's nested review handoff, then calls `code-review` once for the complete ticket.
 
 For a small task, start with `grilling`. After the user confirms the shared understanding, it enters the minimal execution flow: `tdd`, then one `code-review`.
@@ -51,10 +51,11 @@ Use `/wayfinder` when the destination is clear enough to name but the route is t
 - `grill-with-docs` ends its alignment phase at a confirmation gate, then calls `to-spec` when the user approves.
 - `wayfinder` ends when the decision map is clear; it does not implement decision tickets.
 - `improve-codebase-architecture` ends at a settled refactoring decision; it does not modify code or call `implement`.
-- `to-spec` and `to-tickets` pause at confirmation gates before their downstream calls.
+- `to-spec` confirms the complete spec and implementation together; `to-tickets` automatically decomposes and hands off to `implement` without another confirmation gate.
+- Internal analysis, document updates, test-seam selection, and nested `grilling` returns do not add approval gates. Keep genuine questions and the final plan gates; reuse same-scope approval downstream.
 - `implement` is the only owner of the final review in its run; nested TDD review is ignored.
 - `diagnosing-bugs` calls `code-review` once after its review gate and before commit.
 
 ## Boundary rule
 
-Do not route to a skill outside this repository's 16 entries. If a task needs several skills, name the full sequence and explain the transition point between them.
+Do not route to a skill outside this repository's 15 entries. If a task needs several skills, name the full sequence and explain the transition point between them.
